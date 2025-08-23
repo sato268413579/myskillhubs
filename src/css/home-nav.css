@@ -1,0 +1,30 @@
+.link-list {
+    display: flex; /* フレックスボックスの適用 */
+    justify-content: center; /* 水平方向の中央揃え */
+    align-items: center; /* 垂直方向の中央揃え */
+    list-style: none; /* リストマーカーを削除 */
+    padding: 0;
+    margin: 0;
+  }
+
+  .link-list li {
+    margin: 0 10px; /* リストアイテム間のスペースを設定 */
+  }
+
+  .link-list a {
+    text-decoration: none; /* 下線を削除 */
+    color: #333;
+  }
+
+  .link-list a:hover {
+    color: #007BFF; /* ホバー時のリンク色変更 */
+  }
+  .home-header {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
+  }

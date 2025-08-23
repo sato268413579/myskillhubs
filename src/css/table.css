@@ -1,0 +1,68 @@
+/* 全体のリセット */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  margin-bottom: 20px;
+}
+
+/* テーブルヘッダー */
+thead th {
+  background-color: #4CAF50; /* ヘッダーの背景色 */
+  color: white; /* 文字色 */
+  font-weight: bold;
+  padding: 12px 8px;
+  text-align: left; /* 左寄せ */
+  border-bottom: 2px solid #ddd; /* ボーダー */
+}
+
+/* テーブル本体 */
+tbody tr {
+  border-bottom: 1px solid #ddd;
+  transition: background-color 0.3s ease; /* ホバーアニメーション */
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* 偶数行の背景色 */
+}
+
+tbody tr:hover {
+  background-color: #f1f1f1; /* ホバー時の背景色 */
+}
+
+/* セルのスタイル */
+td {
+  padding: 10px 8px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* タスクの状態に応じたスタイル例 */
+.status-done {
+  background-color: #d4edda;
+  color: #155724;
+  font-weight: bold;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+  font-weight: bold;
+}
+
+.status-overdue {
+  background-color: #f8d7da;
+  color: #721c24;
+  font-weight: bold;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  table {
+      font-size: 14px;
+  }
+
+  td, th {
+      padding: 8px 6px;
+  }
+}

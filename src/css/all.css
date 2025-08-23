@@ -1,0 +1,21 @@
+body {
+  margin: auto;
+  width: 50%;
+}
+
+.block-left {
+  text-align: left;
+  margin-bottom: 1cm;
+}
+
+.block-left p {
+  text-indent: 6%;
+}
+
+.h1-style {
+  text-align: center;
+}
+
+.h1-style p {
+  text-align: left;
+}
