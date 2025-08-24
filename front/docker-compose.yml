@@ -1,7 +1,7 @@
 services:
   front:
     build:
-      context: ./front
+      context: ./
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
@@ -9,7 +9,7 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - HOST=0.0.0.0
     volumes:
-      - ./front:/app:cached
+      - ./:/app:cached
       - /app/node_modules  # ← ここでコンテナ側に node_modules を確保
     command: ["sh", "-c", "npm install && npm start"]
     networks:
@@ -22,6 +22,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - /etc/letsencrypt/live/dev.myskillhubs.com:/etc/nginx/certs:ro
     depends_on:
       - front
     networks:
