@@ -1,17 +1,18 @@
-version: "3.9"
 services:
   front:
-    build: ./
+    build:
+      context: ./      # ← frontend ディレクトリを明確に指定
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "80:3000"
+      - "443:3000"
     environment:
       - CHOKIDAR_USEPOLLING=true
-    volumes:
-      - ./front:/app
+    # volumes を一時的にコメントアウトしてビルド確認
+    # - ./front:/front
     command: ["npm", "start"]
     networks:
       - mynetwork
-
 networks:
   mynetwork:
     external: true   # ← backend と同じネットワークを使う
