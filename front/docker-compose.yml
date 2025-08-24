@@ -13,6 +13,18 @@ services:
     command: ["npm", "start"]
     networks:
       - mynetwork
+
+  nginx:
+    image: nginx:stable
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - front
+    networks:
+      - mynetwork
 networks:
   mynetwork:
     external: true   # ← backend と同じネットワークを使う
