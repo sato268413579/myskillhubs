@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  backend:
+    build: ./
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=example
+      - DB_NAME=myapp
+    networks:
+      - mynetwork
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: myapp
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - mynetwork
+
+volumes:
+  db_data:
+
+networks:
+  mynetwork:
+    external: true   # ← 外部ネットワークとして定義
