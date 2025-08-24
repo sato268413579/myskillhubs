@@ -8,9 +8,21 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
     volumes:
-      - ./:/front:cached
+      - ./:/app:cached
       - ./node_modules
     command: ["npm", "start"]
+    networks:
+      - mynetwork
+
+  nginx:
+    image: nginx:stable
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - front
     networks:
       - mynetwork
 networks:
