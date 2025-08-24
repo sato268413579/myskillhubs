@@ -3,6 +3,8 @@ services:
     build:
       context: ./      # ← frontend ディレクトリを明確に指定
       dockerfile: Dockerfile
+    ports:
+      - "3000:3000"   # ← ホストからアクセス可能にする
     environment:
       - CHOKIDAR_USEPOLLING=true
     volumes:
