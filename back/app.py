@@ -7,10 +7,10 @@ app = Flask(__name__)
 CORS(app)  # React からのアクセス許可
 
 # MySQL設定
-db_user = os.environ.get("MYSQL_USER", "root")
-db_pass = os.environ.get("MYSQL_PASSWORD", "password")
-db_host = os.environ.get("MYSQL_HOST", "db")
-db_name = os.environ.get("MYSQL_DATABASE", "crm_db")
+db_user = os.environ.get("DB_USER", "root")
+db_pass = os.environ.get("DB_PASSWORD", "example")
+db_host = os.environ.get("DB_HOST", "db")
+db_name = os.environ.get("DB_DATABASE", "myapp")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{db_user}:{db_pass}@{db_host}/{db_name}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -19,6 +19,7 @@ db = SQLAlchemy(app)
 
 # モデル定義
 class Customer(db.Model):
+    __tablename__ = "customers"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), nullable=False)
