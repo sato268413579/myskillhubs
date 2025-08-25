@@ -1,17 +1,21 @@
-version: "3.9"
 services:
   api:
     container_name: api
     build: ./
+    command: flask run --host=0.0.0.0 --port=5000 --reload
     ports:
       - "5000:5000"
     depends_on:
       - db
+    volumes:
+      - ./:/app
     environment:
       - DB_HOST=db
       - DB_USER=root
       - DB_PASSWORD=example
       - DB_NAME=myapp
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
     networks:
       - mynetwork
 
@@ -32,4 +36,4 @@ volumes:
 
 networks:
   mynetwork:
-    external: true   # ← 外部ネットワークとして定義
+    external: true
