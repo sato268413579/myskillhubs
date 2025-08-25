@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Login.tsx";
 import Service from "./components/Service.tsx";
-
-const ServiceDetail = ({ id }: { id: string }) => {
-  return <div>サービス詳細ページ: {id}</div>;
-};
+import CRM from "./components/CRM.tsx";
+import Tasks from "./services/tasks/List";
 
 const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -18,8 +16,12 @@ const App = () => {
         element={loggedIn ? <Service /> : <Navigate to="/login" />}
       />
       <Route
-        path="/service/:id"
-        element={loggedIn ? <ServiceDetail id={":id"} /> : <Navigate to="/login" />}
+        path="/service/crm"
+        element={loggedIn ? <CRM /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/service/tasks"
+        element={loggedIn ? <Tasks /> : <Navigate to="/login" />}
       />
     </Routes>
   );
