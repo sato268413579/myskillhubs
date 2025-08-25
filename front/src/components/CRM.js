@@ -4,7 +4,7 @@ import {
   createCustomer,
   updateCustomer,
   deleteCustomer,
-} from "../services/crmService";
+} from "../pages/crmService";
 
 const CRM = () => {
   const [customers, setCustomers] = useState([]);
