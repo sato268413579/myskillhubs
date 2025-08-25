@@ -6,6 +6,7 @@ import Service from './pages/Service';   // 概要画面
 
 // タスク管理ツール
 import List from './pages/tasks/List';   // リスト画面
+import CRMList from './pages/crmService.js';   // CRM画面
 
 function App() {
   return (
@@ -19,6 +20,9 @@ function App() {
 
         {/* タスク管理ツールのルート */}
         <Route path="/service/tasks" element={<List />} />
+
+        {/* CRM */}
+        <Route path="/service/crm" element={<CRMList />} />
       </Routes>
     </Router>
   );

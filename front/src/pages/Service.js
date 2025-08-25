@@ -34,6 +34,15 @@ export default function Service() {
       tags: ["データ", "分析"],
       status: "down",
     },
+    {
+      id: "crm",
+      name: "CRM（顧客管理）",
+      description: "顧客情報を一元管理し、営業活動を効率化します。",
+      icon: "👥",
+      path: "/service/crm",
+      tags: ["顧客", "営業支援", "管理"],
+      status: "active",
+    },
   ];
 
   return (
