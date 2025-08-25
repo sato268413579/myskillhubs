@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "./components/Login";
-import Service from "./components/Service";
+import Login from "./components/Login.tsx";
+import Service from "./components/Service.tsx";
 
 const ServiceDetail = ({ id }: { id: string }) => {
   return <div>サービス詳細ページ: {id}</div>;
