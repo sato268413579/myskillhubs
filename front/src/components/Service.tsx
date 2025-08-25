@@ -1,12 +1,23 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "../css/Service.css"; // スタイルは別ファイルに分ける
+import "../css/Service.css";
 
-export default function Service() {
+// サービス型定義
+interface ServiceItem {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  path: string;
+  tags: string[];
+  status: "active" | "beta" | "down";
+}
+
+const Service: React.FC = () => {
   const navigate = useNavigate();
 
   // サービス一覧データ
-  const services = [
+  const services: ServiceItem[] = [
     {
       id: "tasks",
       name: "タスク管理ツール",
@@ -77,4 +88,6 @@ export default function Service() {
       </div>
     </main>
   );
-}
+};
+
+export default Service;

@@ -4,12 +4,16 @@ import {
   createCustomer,
   updateCustomer,
   deleteCustomer,
-} from "../pages/crmService";
+  Customer, // services/crmService.ts で export した型を利用
+} from "../services/crmService.tsx";
 
-const CRM = () => {
-  const [customers, setCustomers] = useState([]);
-  const [formData, setFormData] = useState({ name: "", email: "" });
-  const [editingId, setEditingId] = useState(null);
+const CRM: React.FC = () => {
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [formData, setFormData] = useState<Omit<Customer, "id">>({
+    name: "",
+    email: "",
+  });
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   useEffect(() => {
     loadCustomers();
@@ -20,7 +24,7 @@ const CRM = () => {
     setCustomers(data);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingId) {
       await updateCustomer(editingId, formData);
@@ -32,12 +36,12 @@ const CRM = () => {
     loadCustomers();
   };
 
-  const handleEdit = (customer) => {
+  const handleEdit = (customer: Customer) => {
     setEditingId(customer.id);
     setFormData({ name: customer.name, email: customer.email });
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     await deleteCustomer(id);
     loadCustomers();
   };
