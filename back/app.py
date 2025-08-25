@@ -7,7 +7,14 @@ import os
 import bcrypt
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 CORS(app)  # React からのアクセス許可
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+# Flask 3 では app に login_manager を明示的に登録
+app.login_manager = login_manager
 
 # MySQL設定
 db_user = os.environ.get("DB_USER", "root")
@@ -69,7 +76,6 @@ def delete_customer(id):
     db.session.commit()
     return jsonify({"message": "Deleted"}), 200
 
-@login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 

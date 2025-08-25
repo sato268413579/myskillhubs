@@ -42,6 +42,7 @@ const Login: React.FC<Props> = ({ setLoggedIn }) => {
             placeholder="パスワード"
             type="password"
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            autoComplete="current-password"
             required
           />
           <button
