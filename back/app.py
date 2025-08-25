@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify, session
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import bcrypt
 
 app = Flask(__name__)
 CORS(app)  # React からのアクセス許可
@@ -33,10 +34,10 @@ class User(UserMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
 
     def to_dict(self):
-        return {"id": self.id, "username": self.username, "password": self.password}
+        return {"id": self.id, "username": self.username, "password_hash": self.password_hash}
 
 # ルート
 @app.route("/customers", methods=["GET"])
@@ -72,20 +73,11 @@ def delete_customer(id):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
-    # テストユーザー作成
-    if not User.query.filter_by(username="test").first():
-        user = User(username="test", password=generate_password_hash("password"))
-        db.session.add(user)
-        db.session.commit()
-
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
     user = User.query.filter_by(username=data["username"]).first()
-    if user and check_password_hash(user.password, data["password"]):
+    if user and bcrypt.checkpw(data["password"].encode('utf-8'), user.password_hash.encode('utf-8')):
         login_user(user)
         return jsonify({"message": "ログイン成功"})
     return jsonify({"message": "ユーザー名またはパスワードが違います"}), 401
