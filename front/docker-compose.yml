@@ -1,5 +1,6 @@
 services:
   front:
+    container_name: front
     build:
       context: ./
       dockerfile: Dockerfile
@@ -22,7 +23,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - /etc/letsencrypt/live/dev.myskillhubs.com:/etc/nginx/certs:ro
+      - /etc/letsencrypt/archive/dev.myskillhubs.com:/etc/nginx/certs:ro
     depends_on:
       - front
     networks:
