@@ -28,24 +28,6 @@ const Service: React.FC = () => {
       status: "active",
     },
     {
-      id: "chat",
-      name: "チャットサービス",
-      description: "リアルタイムにメッセージをやり取りできます。",
-      icon: "💬",
-      path: "#", // 仮
-      tags: ["コミュニケーション"],
-      status: "beta",
-    },
-    {
-      id: "analytics",
-      name: "アクセス解析",
-      description: "サービス利用状況を可視化します。",
-      icon: "📊",
-      path: "#", // 仮
-      tags: ["データ", "分析"],
-      status: "down",
-    },
-    {
       id: "crm",
       name: "CRM（顧客管理）",
       description: "顧客情報を一元管理し、営業活動を効率化します。",
