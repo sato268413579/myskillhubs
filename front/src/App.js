@@ -7,15 +7,19 @@ import CRM from "./components/CRM.tsx";
 import Tasks from "./services/tasks/List";
 
 const App = () => {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(null); // null = チェック中
 
-  // 初期レンダリング時にクッキーをチェック
   useEffect(() => {
     const cookie = Cookies.get("loggedIn");
     if (cookie === "true") {
       setLoggedIn(true);
+    } else {
+      setLoggedIn(false);
     }
   }, []);
+
+  // クッキー確認中は何も描画しない
+  if (loggedIn === null) return null;
 
   return (
     <Routes>
