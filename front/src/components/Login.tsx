@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../services/login.ts";
+import Cookies from "js-cookie";
 
 interface Props {
   setLoggedIn: (value: boolean) => void;
@@ -17,6 +18,8 @@ const Login: React.FC<Props> = ({ setLoggedIn }) => {
     try {
       const res = await login(username, password);
       if (res.message === "ログイン成功") {
+        // クッキーに2時間の有効期限でログイン状態を保持
+        Cookies.set("loggedIn", "true", { expires: 1 / 12 }); // 1/12日 = 2時間
         setLoggedIn(true);
         navigate("/"); // ← ログイン成功後にサービス一覧へ遷移
       } else {
