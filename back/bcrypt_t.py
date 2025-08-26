@@ -2,6 +2,6 @@
 # ※ bcrypt モジュールはコンテナに入っていないのでインストール作業必要。
 import bcrypt
 
-password = "admin"
+password = "test"
 hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 print(hashed.decode('utf-8'))

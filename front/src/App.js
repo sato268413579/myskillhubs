@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import Login from "./components/Login.tsx";
 import Service from "./components/Service.tsx";
 import CRM from "./components/CRM.tsx";
-import Tasks from "./services/tasks/List";
+import Tasks from "./components/TaskManager.tsx";
 
 const App = () => {
   const [loggedIn, setLoggedIn] = useState(null); // null = チェック中
