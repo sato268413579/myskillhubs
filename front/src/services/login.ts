@@ -2,7 +2,7 @@ import API_BASE_URL from "../config/api";
 import { Service } from "../types";
 
 export const login = async (username: string, password: string): Promise<{ message: string }> => {
-  const res = await fetch(`${API_BASE_URL}/login`, {
+  const res = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -12,15 +12,17 @@ export const login = async (username: string, password: string): Promise<{ messa
 };
 
 export const logout = async (): Promise<{ message: string }> => {
-  const res = await fetch(`${API_BASE_URL}/logout`, {
+  const res = await fetch(`${API_BASE_URL}/auth/logout`, {
     method: "POST",
     credentials: "include",
   });
   return res.json();
 };
 
-export const getServices = async (): Promise<Service[]> => {
-  const res = await fetch(`${API_BASE_URL}/services`, { credentials: "include" });
-  if (!res.ok) throw new Error("認証が必要です");
+export const currentUser = async (): Promise<{ message: string }> => {
+  const res = await fetch(`${API_BASE_URL}/auth/me`, {
+    method: "GET",
+    credentials: "include",
+  });
   return res.json();
 };

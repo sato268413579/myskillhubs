@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from flask_login import current_user
 from sqlalchemy import func
 from config.db import db
 from models.Customer import Customer
@@ -7,14 +8,13 @@ from models.Deal import Deal
 from models.Contact import Contact
 from datetime import datetime
 
-# 変更: url_prefix を "/" にすることで /customers/create にアクセス可能
-crm_bp = Blueprint("crm", __name__, url_prefix="/customers")
+crm_bp = Blueprint("crm", __name__, url_prefix="/api/customers")
 
 # 一覧（軽量）
-# GET /customers
 @crm_bp.route("", methods=["GET"])
 def get_customers_route():
-    customers = Customer.query.order_by(Customer.created_at.desc()).all()
+    user_id = current_user.id
+    customers = Customer.query.filter_by(user_id=user_id).order_by(Customer.created_at.desc()).all()
     return jsonify([c.to_dict() for c in customers])
 
 # 作成（基本情報＋タグ）
@@ -23,8 +23,11 @@ def get_customers_route():
 def create_customer_route():
     data = request.json
 
+    user_id = current_user.id
+
     new_c = Customer(
         name=data.get("name"),
+        user_id=user_id,
         email=data.get("email"),
         company=data.get("company"),
         department=data.get("department"),
@@ -53,6 +56,7 @@ def create_customer_route():
     for contact_type in data.get("contacts", []):
         contact = Contact(contact_type=contact_type.contact_type, customer=new_c)
         db.session.add(contact)
+
     db.session.commit()
 
     return jsonify(new_c.to_dict()), 201
@@ -112,8 +116,12 @@ def list_deals_route(id):
 def create_deal_route(id):
     Customer.query.get_or_404(id)
     data = request.get_json() or {}
+
+    user_id = current_user.id
+
     deal = Deal(
         customer_id=id,
+        user_id=user_id,
         title=data.get("title"),
         amount=data.get("amount"),
         status=data.get("status"),
@@ -136,8 +144,12 @@ def list_contacts_route(id):
 def create_contact_route(id):
     Customer.query.get_or_404(id)
     data = request.get_json() or {}
+
+    user_id = current_user.id
+
     log = Contact(
         customer_id=id,
+        user_id=user_id,
         contact_type=data.get("contact_type") or "note",
         note=data.get("note"),
         contact_date=datetime.fromisoformat(data["contact_date"]) if data.get("contact_date") else datetime.utcnow(),
