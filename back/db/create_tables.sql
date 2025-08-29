@@ -3,6 +3,7 @@ USE myapp;
 -- 顧客テーブル
 CREATE TABLE IF NOT EXISTS `customers` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INTEGER NOT NULL,
   `name` VARCHAR(120) NOT NULL,
   `email` VARCHAR(120) NOT NULL,
   `company` VARCHAR(120),
@@ -34,6 +35,7 @@ INSERT INTO `users`(`username`, `email`, `password_hash`) VALUES ('test', 'test@
 CREATE TABLE IF NOT EXISTS `deals` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `customer_id` INT NOT NULL,
+  `user_id` INTEGER NOT NULL,
   `title` VARCHAR(100) NOT NULL,           -- 取引タイトル
   `amount` DECIMAL(12,2),                  -- 金額
   `status` VARCHAR(50),                    -- 状況（提案中, 成約, 失注など）
@@ -48,6 +50,7 @@ CREATE TABLE IF NOT EXISTS `deals` (
 CREATE TABLE IF NOT EXISTS `contacts` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `customer_id` INT NOT NULL,
+  `user_id` INTEGER NOT NULL,
   `contact_type` VARCHAR(50),              -- 種別（電話, メール, ミーティング）
   `contact_date` DATETIME,                 -- 日付
   `note` TEXT,                             -- 内容
@@ -60,6 +63,7 @@ CREATE TABLE IF NOT EXISTS `contacts` (
 CREATE TABLE IF NOT EXISTS `notes` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `customer_id` INT NOT NULL,
+  `user_id` INTEGER NOT NULL,
   `content` TEXT NOT NULL,
   `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

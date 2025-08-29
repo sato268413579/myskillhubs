@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify
-from flask_login import login_user, login_required, logout_user
+from flask_login import login_user, login_required, logout_user, current_user
 import bcrypt
 
 from models.User import User
 from config.db import db
 
-login_bp = Blueprint("login", __name__, url_prefix="/")
+login_bp = Blueprint("login", __name__, url_prefix="/api/auth")
 
 # Flask-Login 用: user_loader は app.py 側で login_manager に登録する
 def load_user(user_id):
@@ -25,3 +25,12 @@ def login():
 def logout():
     logout_user()
     return jsonify({"message": "ログアウトしました"})
+
+@login_bp.route("/me", methods=["GET"])
+@login_required
+def get_current_user():
+    return jsonify({
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email
+    })
