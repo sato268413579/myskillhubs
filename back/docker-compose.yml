@@ -17,6 +17,8 @@ services:
       - DB_NAME=myapp
       - FLASK_ENV=development
       - FLASK_APP=app.py
+      - GEMINI_API_KEY=AIzaSyAU8OPTM4PyxRoNUEkNnsPoHVFbQgy05Rg
+
     networks:
       - mynetwork
 

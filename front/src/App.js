@@ -5,6 +5,7 @@ import Login from "./components/Login.tsx";
 import Service from "./components/Service.tsx";
 import CRM from "./components/CRM.tsx";
 import Tasks from "./components/TaskManager.tsx";
+import TrendSearch from "./components/TrendSearch.tsx";
 
 const App = () => {
   const [loggedIn, setLoggedIn] = useState(null); // null = チェック中
@@ -35,6 +36,10 @@ const App = () => {
       <Route
         path="/service/tasks"
         element={loggedIn ? <Tasks /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/service/aiSearch"
+        element={loggedIn ? <TrendSearch /> : <Navigate to="/login" />}
       />
     </Routes>
   );

@@ -8,6 +8,7 @@ import bcrypt
 from config.db import init_db, db
 from feature.crm.routes import crm_bp
 from feature.login.routes import login_bp, load_user
+from feature.trendSearch.routes import trend_search_bp
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
@@ -29,6 +30,7 @@ def user_loader(user_id):
 # ルート
 app.register_blueprint(crm_bp)
 app.register_blueprint(login_bp)
+app.register_blueprint(trend_search_bp)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
