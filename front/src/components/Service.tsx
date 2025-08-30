@@ -36,6 +36,15 @@ const Service: React.FC = () => {
       tags: ["顧客", "営業支援", "管理"],
       status: "active",
     },
+    {
+      id: "aiSearch",
+      name: "AI情報収集",
+      description: "AIによる各分野の情報収集を取得",
+      icon: "🤖",
+      path: "/service/aiSearch",
+      tags: ["検索", "トレンド支援", "効率化"],
+      status: "active",
+    },
   ];
 
   return (

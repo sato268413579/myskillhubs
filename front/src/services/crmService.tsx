@@ -47,7 +47,6 @@ export const getCustomers = async (): Promise<Customer[]> => {
   const res = await fetch(`${API_BASE_URL}/customers`);
   if (!res.ok) throw new Error("failed to fetch customers");
   const data = await res.json();  // 一度だけ呼ぶ
-  console.log(data);
   return data;
 };
 
