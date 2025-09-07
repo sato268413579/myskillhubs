@@ -28,12 +28,10 @@ def trendSearch():
 @trend_search_bp.route("/search", methods=["GET"])
 def search():
     try:
-        # クエリパラメータからトレンド取得
         trend = request.args.get("trend")
         if not trend:
             return jsonify({"error": "trend parameter is required"}), 400
 
-        # サーバー側でプロンプト定義
         prompt = f"""
         あなたは最新トレンドの調査アシスタントです。
         指定されたテーマ「{trend}」に関する現在のトレンドや注目ポイントをわかりやすく整理し、
@@ -47,22 +45,24 @@ def search():
         }}
         """
 
-        # モデルを初期化
-        model = genai.GenerativeModel("gemini-1.5-flash")
-
-        # リクエスト送信
+        model = genai.GenerativeModel("gemini-2.5-flash")
         response = model.generate_content(prompt)
 
-        # Geminiの返答（JSONテキスト）
-        text = response.text
+        text = response.text.strip()
 
-        # JSONとして返す（Geminiが正しくJSONを返さなかった場合のためにtry）
+        # ✅ コードブロックがついていたら除去
+        if text.startswith("```"):
+            text = text.strip("`")            # バッククォート除去
+            # "json\n{...}" 形式の場合は json\n を削る
+            if text.startswith("json"):
+                text = text[len("json"):].strip()
+
         try:
             parsed = json.loads(text)
             return jsonify(parsed)
         except Exception:
-            # 万一JSONで返ってこなかった場合はそのまま返却
             return jsonify({"trend": trend, "raw_response": text})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+

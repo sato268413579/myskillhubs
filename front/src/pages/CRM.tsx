@@ -11,7 +11,7 @@ import {
   CustomerInput,
   Deal,
   ContactLog,
-} from "../services/crmService.tsx";
+} from "../services/crmService";
 
 const emptyForm: CustomerInput = {
   name: "",

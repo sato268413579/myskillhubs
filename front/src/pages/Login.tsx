@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../services/login.ts";
+import { login } from "../services/login";
 import Cookies from "js-cookie";
 
 interface Props {
