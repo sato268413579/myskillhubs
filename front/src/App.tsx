@@ -6,6 +6,13 @@ import Service from "./pages/Service";
 import CRM from "./pages/CRM";
 import Tasks from "./pages/TaskManager";
 import TrendSearch from "./pages/TrendSearch";
+import Menu3D from "./pages/3DUXPractice";
+import MyCustomApp from "./pages/MyCustomApp";
+
+const sampleMenus = [
+  { name: "Dashboard", content: <MyCustomApp />, x: 0, y: 0, z: 0 },
+  { name: "Dashboard", content: <MyCustomApp />, x: 10, y: 0, z: 0 },
+];
 
 const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null); // null = チェック中
@@ -25,6 +32,7 @@ const App: React.FC = () => {
       <Route path="/service/crm" element={loggedIn ? <CRM /> : <Navigate to="/login" />} />
       <Route path="/service/tasks" element={loggedIn ? <Tasks /> : <Navigate to="/login" />} />
       <Route path="/service/aiSearch" element={loggedIn ? <TrendSearch /> : <Navigate to="/login" />} />
+      <Route path="/service/3d" element={loggedIn ? <Menu3D menus={sampleMenus} /> : <Navigate to="/login" />} />
     </Routes>
   );
 };
