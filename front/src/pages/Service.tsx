@@ -45,6 +45,15 @@ const Service: React.FC = () => {
       tags: ["検索", "トレンド支援", "効率化"],
       status: "active",
     },
+    {
+      id: "3d",
+      name: "3D可視化メニュー",
+      description: "3Dによる新しいWebアプリ",
+      icon: "🤖",
+      path: "/service/3d",
+      tags: ["革新", "新規"],
+      status: "active",
+    },
   ];
 
   return (
