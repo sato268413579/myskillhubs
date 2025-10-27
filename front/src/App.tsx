@@ -10,8 +10,7 @@ import Menu3D from "./pages/3DUXPractice";
 import MyCustomApp from "./pages/MyCustomApp";
 
 const sampleMenus = [
-  { name: "Dashboard", content: <MyCustomApp />, x: 0, y: 0, z: 0 },
-  { name: "Dashboard", content: <MyCustomApp />, x: 10, y: 0, z: 0 },
+  { name: "Dashboard", content: '', x: 10, y: 0, z: 0 },
 ];
 
 const App: React.FC = () => {

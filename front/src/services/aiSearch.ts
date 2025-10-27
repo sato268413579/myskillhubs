@@ -12,8 +12,15 @@ export const getTrendSearchLog = async (): Promise<TrendSearchLog[]> => {
 };
 
 export const search = async (trend: string) => {
-  const res = await fetch(`${API_BASE_URL}/trendSearch/search?trend=${trend}`);
+  const res = await fetch(`${API_BASE_URL}/trendSearch/search?trend=${encodeURIComponent(trend)}`);
   if (!res.ok) throw new Error("failed to fetch search");
-  const data = await res.json();  // 一度だけ呼ぶ
+  const data = await res.json();
+  return data;
+};
+
+export const searchSimple = async (trend: string) => {
+  const res = await fetch(`${API_BASE_URL}/trendSearch/search/simple?trend=${encodeURIComponent(trend)}`);
+  if (!res.ok) throw new Error("failed to fetch simple search");
+  const data = await res.json();
   return data;
 };

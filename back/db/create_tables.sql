@@ -86,3 +86,41 @@ CREATE TABLE IF NOT EXISTS `customer_tags` (
   CONSTRAINT `fk_customer_tags_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_customer_tags_tag` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- トレンド検索ログテーブル
+CREATE TABLE IF NOT EXISTS `trend_search_log` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `search_query` TEXT NOT NULL,
+  `search_type` VARCHAR(50) DEFAULT 'basic',
+  
+  -- 検索結果データ
+  `result_summary` TEXT,
+  `keywords` TEXT,                         -- JSON形式で保存
+  `insights` TEXT,                         -- JSON形式で保存
+  `sources_used` TEXT,                     -- JSON形式で保存
+  `confidence_score` FLOAT DEFAULT 0.0,
+  
+  -- メタデータ
+  `search_duration` FLOAT,                 -- 検索にかかった時間（秒）
+  `tokens_used` INT DEFAULT 0,
+  `retry_count` INT DEFAULT 0,
+  `success` BOOLEAN DEFAULT TRUE,
+  `error_message` TEXT,
+  
+  -- タイムスタンプ
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
+  -- 検索期間
+  `search_period_start` DATE,
+  `search_period_end` DATE,
+  
+  PRIMARY KEY (`id`),
+  KEY `idx_trend_search_log_user_id` (`user_id`),
+  KEY `idx_trend_search_log_created_at` (`created_at`),
+  KEY `idx_trend_search_log_search_type` (`search_type`),
+  KEY `idx_trend_search_log_success` (`success`),
+  KEY `idx_trend_search_log_period` (`search_period_start`, `search_period_end`),
+  CONSTRAINT `fk_trend_search_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

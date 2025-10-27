@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_login import current_user
+from flask_login import current_user, login_required
 from sqlalchemy import func
 from config.db import db
 from models.Customer import Customer
@@ -12,6 +12,7 @@ crm_bp = Blueprint("crm", __name__, url_prefix="/api/customers")
 
 # 一覧（軽量）
 @crm_bp.route("", methods=["GET"])
+@login_required
 def get_customers_route():
     user_id = current_user.id
     customers = Customer.query.filter_by(user_id=user_id).order_by(Customer.created_at.desc()).all()
@@ -20,6 +21,7 @@ def get_customers_route():
 # 作成（基本情報＋タグ）
 # POST /customers/create
 @crm_bp.route("/create", methods=["POST"])
+@login_required
 def create_customer_route():
     data = request.json
 
@@ -65,6 +67,7 @@ def create_customer_route():
 # 1件取得（詳細：履歴含む）
 # GET /customers/<id>
 @crm_bp.route("/<int:id>", methods=["GET"])
+@login_required
 def get_customer_detail_route(id):
     c = Customer.query.get_or_404(id)
     return jsonify(c.to_dict())
@@ -72,6 +75,7 @@ def get_customer_detail_route(id):
 # 更新（基本情報＋タグ差し替えも可能）
 # PUT /customers/<id>
 @crm_bp.route("/<int:id>", methods=["PUT"])
+@login_required
 def update_customer_route(id):
     data = request.get_json() or {}
     c = Customer.query.get_or_404(id)
@@ -97,6 +101,7 @@ def update_customer_route(id):
 # 削除
 # DELETE /customers/<id>
 @crm_bp.route("/<int:id>", methods=["DELETE"])
+@login_required
 def delete_customer_route(id):
     c = Customer.query.get_or_404(id)
     db.session.delete(c)
@@ -106,6 +111,7 @@ def delete_customer_route(id):
 # --- 取引履歴（Deals） ---
 # GET /customers/<id>/deals
 @crm_bp.route("/<int:id>/deals", methods=["GET"])
+@login_required
 def list_deals_route(id):
     Customer.query.get_or_404(id)
     deals = Deal.query.filter_by(customer_id=id).order_by(Deal.created_at.desc()).all()

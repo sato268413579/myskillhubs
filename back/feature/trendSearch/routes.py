@@ -1,68 +1,117 @@
 from flask import Blueprint, request, jsonify
-from flask_login import login_user, login_required, logout_user, current_user
-import bcrypt
+from flask_login import current_user
 import json
-import google.generativeai as genai
-import os
 
 from models.TrendSearchLog import TrendSearchLog
+from models.User import User
 from config.db import db
+
+# search.pyから検索関数をインポート
+from .search import execute_full_search, execute_simple_search, get_search_health_status
 
 trend_search_bp = Blueprint("trendSearch", __name__, url_prefix="/api/trendSearch")
 
-# Gemini API Key を環境変数から読み込み
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-# Flask-Login 用: user_loader は app.py 側で login_manager に登録する
+# Flask-Login用
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 @trend_search_bp.route("/", methods=["GET"])
 def trendSearch():
+    """過去の調査ログを取得"""
+    if not current_user.is_authenticated:
+        return jsonify({"error": "Authentication required"}), 401
+    
     user_id = current_user.id
-
-    trendSearchLogs = TrendSearchLog.query.filter_by(user_id=user_id).all()
-    return jsonify([c.to_dict() for c in trendSearchLogs])
-
+    trend_search_logs = TrendSearchLog.query.filter_by(user_id=user_id).all()
+    return jsonify([log.to_dict() for log in trend_search_logs])
 
 @trend_search_bp.route("/search", methods=["GET"])
 def search():
+    """
+    メインの検索エンドポイント
+    search.pyのexecute_full_search関数を呼び出し
+    """
     try:
+        # リクエストパラメータの取得
         trend = request.args.get("trend")
         if not trend:
             return jsonify({"error": "trend parameter is required"}), 400
-
-        prompt = f"""
-        あなたは最新トレンドの調査アシスタントです。
-        指定されたテーマ「{trend}」に関する現在のトレンドや注目ポイントをわかりやすく整理し、
-        JSON形式で以下のように返してください:
-
-        {{
-          "trend": "{trend}",
-          "summary": "要約",
-          "keywords": ["キーワード1", "キーワード2", "キーワード3"],
-          "insights": ["具体的な洞察1", "具体的な洞察2"]
-        }}
-        """
-
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        response = model.generate_content(prompt)
-
-        text = response.text.strip()
-
-        # ✅ コードブロックがついていたら除去
-        if text.startswith("```"):
-            text = text.strip("`")            # バッククォート除去
-            # "json\n{...}" 形式の場合は json\n を削る
-            if text.startswith("json"):
-                text = text[len("json"):].strip()
-
-        try:
-            parsed = json.loads(text)
-            return jsonify(parsed)
-        except Exception:
-            return jsonify({"trend": trend, "raw_response": text})
-
+        
+        trend = trend.strip()
+        if not trend:
+            return jsonify({"error": "trend cannot be empty"}), 400
+        
+        # search.pyの関数を呼び出し
+        result = execute_full_search(trend)
+        
+        # データベースへの保存（認証済みユーザーの場合）
+        if current_user.is_authenticated:
+            try:
+                trend_log = TrendSearchLog(
+                    user_id=current_user.id,
+                    trend=trend,
+                    result=json.dumps(result, ensure_ascii=False)
+                )
+                db.session.add(trend_log)
+                db.session.commit()
+                print("✅ Research result saved to database")
+            except Exception as db_error:
+                print(f"⚠️ Database save error: {db_error}")
+                # データベースエラーでも検索結果は返す
+        
+        return jsonify(result)
+        
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"❌ Search endpoint error: {e}")
+        return jsonify({
+            "error": "検索中にエラーが発生しました",
+            "details": str(e),
+            "trend": trend if 'trend' in locals() else 'Unknown'
+        }), 500
 
+@trend_search_bp.route("/search/simple", methods=["GET"])
+def search_simple():
+    """
+    シンプル検索エンドポイント
+    search.pyのexecute_simple_search関数を呼び出し
+    """
+    try:
+        # リクエストパラメータの取得
+        trend = request.args.get("trend")
+        if not trend:
+            return jsonify({"error": "trend parameter is required"}), 400
+        
+        trend = trend.strip()
+        if not trend:
+            return jsonify({"error": "trend cannot be empty"}), 400
+        
+        # search.pyの関数を呼び出し
+        result = execute_simple_search(trend)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"❌ Simple search endpoint error: {e}")
+        return jsonify({
+            "error": "シンプル検索中にエラーが発生しました",
+            "details": str(e)
+        }), 500
+
+@trend_search_bp.route("/health", methods=["GET"])
+def health_check():
+    """
+    ヘルスチェックエンドポイント
+    search.pyのget_search_health_status関数を呼び出し
+    """
+    try:
+        # search.pyの関数を呼び出し
+        status = get_search_health_status()
+        return jsonify(status)
+        
+    except Exception as e:
+        print(f"❌ Health check error: {e}")
+        return jsonify({
+            "service": "LangGraph AI Knowledge Research Assistant",
+            "status": "error",
+            "error": str(e)
+        }), 500
