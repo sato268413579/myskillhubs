@@ -44,14 +44,18 @@ export interface Customer {
 export type CustomerInput = Omit<Customer, "id" | "deals" | "contacts" | "created_at" | "updated_at">;
 
 export const getCustomers = async (): Promise<Customer[]> => {
-  const res = await fetch(`${API_BASE_URL}/customers`);
+  const res = await fetch(`${API_BASE_URL}/customers`, {
+    credentials: 'include'
+  });
   if (!res.ok) throw new Error("failed to fetch customers");
   const data = await res.json();  // 一度だけ呼ぶ
   return data;
 };
 
 export const getCustomerDetail = async (id: number): Promise<Customer> => {
-  const res = await fetch(`${API_BASE_URL}/customers/${id}`);
+  const res = await fetch(`${API_BASE_URL}/customers/${id}`, {
+    credentials: 'include'
+  });
   if (!res.ok) throw new Error("failed to fetch customer detail");
   return res.json();
 };
@@ -60,6 +64,7 @@ export const createCustomer = async (data: CustomerInput): Promise<Customer> => 
   const res = await fetch(`${API_BASE_URL}/customers/create`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: 'include',
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("failed to create customer");
@@ -70,6 +75,7 @@ export const updateCustomer = async (id: number, data: Partial<CustomerInput>): 
   const res = await fetch(`${API_BASE_URL}/customers/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
+    credentials: 'include',
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("failed to update customer");
@@ -77,7 +83,10 @@ export const updateCustomer = async (id: number, data: Partial<CustomerInput>): 
 };
 
 export const deleteCustomer = async (id: number): Promise<{ message: string }> => {
-  const res = await fetch(`${API_BASE_URL}/customers/${id}`, { method: "DELETE" });
+  const res = await fetch(`${API_BASE_URL}/customers/${id}`, { 
+    method: "DELETE",
+    credentials: 'include'
+  });
   if (!res.ok) throw new Error("failed to delete customer");
   return res.json();
 };
@@ -87,6 +96,7 @@ export const addDeal = async (customerId: number, payload: Omit<Deal, "id" | "cu
   const res = await fetch(`${API_BASE_URL}/customers/${customerId}/deals`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: 'include',
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error("failed to add deal");
@@ -94,7 +104,9 @@ export const addDeal = async (customerId: number, payload: Omit<Deal, "id" | "cu
 };
 
 export const listDeals = async (customerId: number) => {
-  const res = await fetch(`${API_BASE_URL}/customers/${customerId}/deals`);
+  const res = await fetch(`${API_BASE_URL}/customers/${customerId}/deals`, {
+    credentials: 'include'
+  });
   if (!res.ok) throw new Error("failed to list deals");
   return res.json() as Promise<Deal[]>;
 };
@@ -103,6 +115,7 @@ export const addContact = async (customerId: number, payload: Omit<ContactLog, "
   const res = await fetch(`${API_BASE_URL}/customers/${customerId}/contacts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: 'include',
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error("failed to add contact");
@@ -110,7 +123,9 @@ export const addContact = async (customerId: number, payload: Omit<ContactLog, "
 };
 
 export const listContacts = async (customerId: number) => {
-  const res = await fetch(`${API_BASE_URL}/customers/${customerId}/contacts`);
+  const res = await fetch(`${API_BASE_URL}/customers/${customerId}/contacts`, {
+    credentials: 'include'
+  });
   if (!res.ok) throw new Error("failed to list contacts");
   return res.json() as Promise<ContactLog[]>;
 };

@@ -1,4 +1,5 @@
 from datetime import datetime
+import pytz
 from config.db import db
 
 class Deal(db.Model):
@@ -10,7 +11,7 @@ class Deal(db.Model):
     amount = db.Column(db.Numeric(12, 2), nullable=True)
     status = db.Column(db.String(50), nullable=True)  # e.g. "open","won","lost"
     closed_at = db.Column(db.DateTime, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(pytz.timezone('Asia/Tokyo')), nullable=False)
 
     # 顧客へのリレーション
     customer = db.relationship("Customer", back_populates="deals")
