@@ -12,6 +12,7 @@ export async function getMenuLayout(intent: string): Promise<MenuItem[]> {
   const res = await fetch(`${API_BASE_URL}/3d`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: 'include',
     body: JSON.stringify({ intent }),
   });
   const data = await res.json();

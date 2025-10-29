@@ -1,4 +1,5 @@
 from datetime import datetime
+import pytz
 from config.db import db
 
 class Contact(db.Model):
@@ -8,7 +9,7 @@ class Contact(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey("customers.id"), nullable=False)
     contact_type = db.Column(db.String(50), nullable=False)  # "call","email","meeting" など
     note = db.Column(db.Text, nullable=True)
-    contact_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    contact_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(pytz.timezone('Asia/Tokyo')))
 
     # 顧客へのリレーション
     customer = db.relationship("Customer", back_populates="contacts")

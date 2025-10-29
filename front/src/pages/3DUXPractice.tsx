@@ -803,7 +803,9 @@ const Menu2D: React.FC<Props> = ({ menus: initialMenus }) => {
   // Electronの状態をチェック
   const checkElectronStatus = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/service/3d/check-electron`);
+      const response = await fetch(`${API_BASE_URL}/service/3d/check-electron`, {
+        credentials: 'include'
+      });
       if (response.ok) {
         const data = await response.json();
         return data;

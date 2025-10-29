@@ -18,7 +18,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
   };
 
   return (
-    <div 
+    <div
       className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
       dangerouslySetInnerHTML={{ __html: parseMarkdown(content) }}
     />
@@ -30,16 +30,17 @@ interface TrendResult {
   summary: string;
   keywords: string[];
   insights: string[];
-  popularity_score?: number;
-  trend_direction?: string;
-  related_topics?: string[];
-  search_timestamp?: string;
-  data_sources?: number;
-  key_findings?: string[];
-  market_data?: string;
-  recent_developments?: string;
-  key_points?: string[];
-  current_status?: string;
+  latest_developments: string[];
+  market_analysis: {
+    current_status: string;
+    growth_trend: string;
+    key_players: string[];
+  };
+  future_outlook: string[];
+  reliability_note: string;
+  research_timestamp?: string;
+  research_type?: string;
+  analysis_method?: string;
   raw_response?: string; // エラー時用
 }
 
@@ -47,7 +48,6 @@ const TrendSearch: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<TrendResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [searchMode, setSearchMode] = useState<'full' | 'simple'>('simple');
 
   // サンプルとして用意するトレンド候補
   const trends = ["AI技術", "リモートワーク", "サステナビリティ", "NFT", "メタバース", "Web3", "DX", "フィンテック"];
@@ -58,13 +58,14 @@ const TrendSearch: React.FC = () => {
     setResult(null);
 
     try {
-      const endpoint = searchMode === 'full' ? 'search' : 'search/simple';
-      const res = await fetch(`${API_BASE_URL}/trendSearch/${endpoint}?trend=${encodeURIComponent(trend)}`);
-      
+      const res = await fetch(`${API_BASE_URL}/trendSearch/search?trend=${encodeURIComponent(trend)}`, {
+        credentials: 'include'
+      });
+
       if (!res.ok) {
         throw new Error(`検索に失敗しました (${res.status})`);
       }
-      
+
       const data = await res.json();
       setResult(data);
     } catch (err: any) {
@@ -95,40 +96,6 @@ const TrendSearch: React.FC = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold text-center">トレンド検索</h1>
-
-        {/* 検索モード選択 */}
-        <div className="flex justify-center">
-          <div className="bg-white rounded-lg p-1 shadow-md">
-            <button
-              onClick={() => setSearchMode('simple')}
-              className={`px-4 py-2 rounded-md transition ${
-                searchMode === 'simple'
-                  ? 'bg-blue-500 text-white shadow'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              クイック検索 (3-10秒)
-            </button>
-            <button
-              onClick={() => setSearchMode('full')}
-              className={`px-4 py-2 rounded-md transition ${
-                searchMode === 'full'
-                  ? 'bg-blue-500 text-white shadow'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              詳細検索 (10-30秒)
-            </button>
-          </div>
-        </div>
-
-        {/* 検索モード説明 */}
-        <div className="text-center text-sm text-gray-600">
-          {searchMode === 'simple' 
-            ? '🚀 検索結果のみを使用した高速分析' 
-            : '🔍 ウェブスクレイピングを含む詳細分析'
-          }
-        </div>
 
         {/* カテゴリ別トレンド選択 */}
         {!result && !loading && (
@@ -185,39 +152,26 @@ const TrendSearch: React.FC = () => {
                     <h2 className="text-2xl font-bold text-indigo-700 mb-2">
                       {result.trend}
                     </h2>
-                    {result.trend_direction && (
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getTrendDirectionColor(result.trend_direction)}`}>
-                        📈 {result.trend_direction}
+                    <div className="flex flex-wrap gap-2">
+                      <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+                        🤖 Gemini AI分析
                       </span>
-                    )}
-                  </div>
-                  
-                  {/* 人気度スコア */}
-                  {result.popularity_score !== undefined && (
-                    <div className="flex flex-col items-center">
-                      <div className="text-sm text-gray-600 mb-1">人気度</div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 h-3 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full transition-all duration-500 ${getPopularityColor(result.popularity_score)}`}
-                            style={{ width: `${result.popularity_score}%` }}
-                          />
-                        </div>
-                        <span className="text-lg font-bold text-gray-700">
-                          {result.popularity_score}
+                      {result.research_type && (
+                        <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
+                          {result.research_type}
                         </span>
-                      </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
-                
+
                 {/* メタデータ */}
                 <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-500">
-                  {result.search_timestamp && (
-                    <span>🕒 {new Date(result.search_timestamp).toLocaleString('ja-JP')}</span>
+                  {result.research_timestamp && (
+                    <span>🕒 {new Date(result.research_timestamp).toLocaleString('ja-JP')}</span>
                   )}
-                  {result.data_sources && (
-                    <span>📊 データソース: {result.data_sources}件</span>
+                  {result.analysis_method && (
+                    <span>🔧 {result.analysis_method}</span>
                   )}
                 </div>
               </CardContent>
@@ -235,65 +189,41 @@ const TrendSearch: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* キーワードと関連トピック */}
-            <div className="grid md:grid-cols-2 gap-4">
-              {/* キーワード */}
-              {result.keywords?.length > 0 && (
-                <Card className="shadow-lg">
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold mb-3 flex items-center">
-                      🏷️ キーワード
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {result.keywords.map((kw, i) => (
-                        <span
-                          key={i}
-                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition"
-                        >
-                          {kw}
-                        </span>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+            {/* キーワード */}
+            {result.keywords?.length > 0 && (
+              <Card className="shadow-lg">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-3 flex items-center">
+                    🏷️ キーワード
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {result.keywords.map((kw, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium hover:bg-blue-200 transition"
+                      >
+                        {kw}
+                      </span>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-              {/* 関連トピック */}
-              {result.related_topics && result.related_topics.length > 0 && (
-                <Card className="shadow-lg">
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold mb-3 flex items-center">
-                      🔗 関連トピック
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {result.related_topics.map((topic, i) => (
-                        <span
-                          key={i}
-                          className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium hover:bg-green-200 transition"
-                        >
-                          {topic}
-                        </span>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* 重要な発見・ポイント */}
-            {((result.key_findings && result.key_findings.length > 0) || (result.key_points && result.key_points.length > 0)) && (
+            {/* 最新動向 */}
+            {result.latest_developments?.length > 0 && (
               <Card className="shadow-lg">
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
-                    🔍 重要な発見
+                    🆕 最新動向
                   </h3>
                   <div className="space-y-3">
-                    {(result.key_findings || result.key_points || []).map((finding, i) => (
-                      <div key={i} className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                        <span className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                          !
+                    {result.latest_developments.map((development, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                        <span className="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          {i + 1}
                         </span>
-                        <p className="text-gray-700 leading-relaxed">{finding}</p>
+                        <p className="text-gray-700 leading-relaxed">{development}</p>
                       </div>
                     ))}
                   </div>
@@ -301,47 +231,64 @@ const TrendSearch: React.FC = () => {
               </Card>
             )}
 
-            {/* 市場データと現在の状況 */}
-            <div className="grid md:grid-cols-2 gap-4">
-              {/* 市場データ */}
-              {result.market_data && (
-                <Card className="shadow-lg">
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold mb-3 flex items-center">
-                      📊 市場データ
-                    </h3>
-                    <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">
-                      {result.market_data}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* 現在の状況 */}
-              {result.current_status && (
-                <Card className="shadow-lg">
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold mb-3 flex items-center">
-                      📈 現在の状況
-                    </h3>
-                    <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">
-                      {result.current_status}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* 最近の動向 */}
-            {result.recent_developments && (
+            {/* 市場分析 */}
+            {result.market_analysis && (
               <Card className="shadow-lg">
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-3 flex items-center">
-                    🆕 最近の動向
+                  <h3 className="text-xl font-semibold mb-4 flex items-center">
+                    📊 市場分析
                   </h3>
-                  <p className="text-gray-700 leading-relaxed bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
-                    {result.recent_developments}
-                  </p>
+                  <div className="space-y-4">
+                    {/* 現在の状況 */}
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-blue-800 mb-2">📈 現在の状況</h4>
+                      <p className="text-gray-700">{result.market_analysis.current_status}</p>
+                    </div>
+                    
+                    {/* 成長トレンド */}
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-green-800 mb-2">📈 成長トレンド</h4>
+                      <p className="text-gray-700">{result.market_analysis.growth_trend}</p>
+                    </div>
+                    
+                    {/* 主要プレイヤー */}
+                    {result.market_analysis.key_players?.length > 0 && (
+                      <div className="bg-purple-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-purple-800 mb-2">🏢 主要プレイヤー</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {result.market_analysis.key_players.map((player, i) => (
+                            <span
+                              key={i}
+                              className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
+                            >
+                              {player}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 将来展望 */}
+            {result.future_outlook?.length > 0 && (
+              <Card className="shadow-lg">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold mb-4 flex items-center">
+                    🔮 将来展望
+                  </h3>
+                  <div className="space-y-3">
+                    {result.future_outlook.map((outlook, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 bg-indigo-50 rounded-lg border-l-4 border-indigo-400">
+                        <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          {i + 1}
+                        </span>
+                        <p className="text-gray-700 leading-relaxed">{outlook}</p>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -351,7 +298,7 @@ const TrendSearch: React.FC = () => {
               <Card className="shadow-lg">
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
-                    💡 専門家の洞察
+                    💡 Gemini AIの洞察
                   </h3>
                   <div className="space-y-3">
                     {result.insights.map((insight, i) => (
@@ -363,6 +310,20 @@ const TrendSearch: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 信頼性に関する注記 */}
+            {result.reliability_note && (
+              <Card className="shadow-lg border-yellow-200">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-3 flex items-center text-yellow-700">
+                    ⚠️ 信頼性に関する注記
+                  </h3>
+                  <p className="text-gray-700 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    {result.reliability_note}
+                  </p>
                 </CardContent>
               </Card>
             )}

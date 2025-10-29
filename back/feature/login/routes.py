@@ -31,6 +31,5 @@ def logout():
 def get_current_user():
     return jsonify({
         "id": current_user.id,
-        "username": current_user.username,
-        "email": current_user.email
+        "username": current_user.username
     })
