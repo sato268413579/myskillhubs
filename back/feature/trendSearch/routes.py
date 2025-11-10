@@ -36,9 +36,7 @@ def search():
         result = execute_full_search(trend)
         
         # データベースへの保存（認証済みユーザーの場合）
-        print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
         if current_user.is_authenticated:
-            print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
             try:
                 trend_log = TrendSearchLog(
                     user_id=current_user.id,
