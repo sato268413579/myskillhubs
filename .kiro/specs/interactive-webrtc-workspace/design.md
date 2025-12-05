@@ -2,57 +2,115 @@
 
 ## Overview
 
-Interactive WebRTC Workspaceは、従来の画面共有を超えた次世代のリモートワークスペースソリューションです。WebRTC技術をベースに、リアルタイム操作転送、エンタープライズグレードのセキュリティ、AI支援による最適化を統合し、業務効率化に特化したユニークなUXを提供します。
+### プロジェクト背景
+Interactive WebRTC Workspaceは、個人開発プロジェクト「MySkillHubs」内のPoC機能の一つです。MySkillHubsは、タスク管理、CRM、AI情報収集、WebRTCウィンドウマネージャーなど、複数の実験的機能を統合したアプリケーションです。
+
+### 本機能の目的
+既存の2D WebRTCウィンドウマネージャーを基盤として、リモート操作機能とセキュリティ機能を段階的に追加し、実用的なインタラクティブワークスペースを構築します。現在実装されているタブキャプチャ、Electronキャプチャ、セッション同期機能を活用しながら、段階的に機能を拡張していきます。
+
+### 開発アプローチ
+- **Phase 1**: 基本機能の完成（リモート操作実行、セキュリティ強化）
+- **Phase 2**: 高度な機能の追加（WebRTC DataChannel、暗号化、OAuth統合）
+- **Phase 3**: AI・モバイル対応（将来実装）
+
+## 現在の実装状況
+
+### フロントエンド（React + TypeScript）
+- **2Dウィンドウマネージャー**: ドラッグ、リサイズ、カメラ操作（パン、ズーム）
+- **WebRTCタブキャプチャ**: getDisplayMedia APIを使用したリアルタイムストリーミング
+- **InteractiveTabCapture**: 操作イベント送信の基礎構造（クリック、スクロール）
+- **WebAppPreviewCard**: Webアプリプレビューとセッション同期UI
+
+### バックエンド（Flask + Python）
+- **Electronキャプチャルート**: `/api/service/3d/start-electron-capture`（モックモード対応）
+- **セッション同期ルート**: `/api/sync-session/<app_id>`（Gmail、GitHub、Notion、Slack）
+- **操作転送ルート**: `/api/service/3d/send-interaction`（基礎実装）
+- **セキュリティ**: HMAC-SHA256トークン生成・検証
 
 ## Architecture
 
-### High-Level Architecture
+### High-Level Architecture（現在の実装）
 
 ```mermaid
 graph TB
-    subgraph "Client Layer"
-        UI[React UI Layer]
-        WM[Window Manager 2D]
-        RC[Remote Control Engine]
-        AI[AI Assistant]
+    subgraph "Client Layer (React)"
+        UI[3DUXPractice.tsx]
+        WM[WindowManager2D]
+        ITC[InteractiveTabCapture]
+        WAP[WebAppPreviewCard]
     end
     
     subgraph "WebRTC Layer"
-        PC[PeerConnection]
-        DC[DataChannel]
+        GDM[getDisplayMedia API]
         MS[MediaStream]
-        SC[Security Controller]
+        VE[Video Element]
     end
     
-    subgraph "Backend Services"
-        AS[Auth Service]
-        TS[Task Service]
-        LS[Logging Service]
-        NS[Notification Service]
+    subgraph "Backend Services (Flask)"
+        EC[Electron Capture Routes]
+        SS[Session Sync Routes]
+        SI[Send Interaction API]
+        TG[Token Generator/Validator]
     end
     
-    subgraph "Infrastructure"
-        TURN[TURN Server]
-        STUN[STUN Server]
-        DB[(Database)]
-        CACHE[(Redis Cache)]
+    subgraph "Data Layer"
+        MEM[In-Memory Storage]
+        SESS[Session Management]
     end
     
     UI --> WM
-    WM --> RC
-    RC --> DC
-    DC --> PC
-    PC --> MS
-    SC --> AS
-    AS --> DB
-    TS --> DB
-    LS --> DB
-    AI --> TS
+    WM --> ITC
+    WM --> WAP
+    ITC --> GDM
+    GDM --> MS
+    MS --> VE
+    ITC --> SI
+    WAP --> SS
+    SI --> TG
+    SS --> SESS
+    EC --> MEM
+```
+
+### Phase 2以降の拡張予定
+
+```mermaid
+graph TB
+    subgraph "追加予定機能"
+        DC[WebRTC DataChannel]
+        EXT[Chrome Extension]
+        OAUTH[OAuth 2.0 Integration]
+        E2E[End-to-End Encryption]
+        DB[(Database)]
+    end
 ```
 
 ### Component Architecture
 
-#### 1. Remote Control Engine
+#### 1. Remote Control Engine（現在の実装）
+
+**現在の実装:**
+```typescript
+// InteractiveTabCapture コンポーネント内
+const sendInteraction = async (interaction: any) => {
+  if (!interactionEnabled || !sessionToken) return;
+
+  try {
+    const response = await fetch('/service/3d/send-interaction', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session_id: tabStream.id,
+        token: sessionToken,
+        ...interaction
+      })
+    });
+  } catch (error) {
+    console.error('Interaction error:', error);
+  }
+};
+```
+
+**Phase 2での拡張予定:**
 ```typescript
 interface RemoteControlEngine {
   // イベント送信
@@ -70,7 +128,28 @@ interface RemoteControlEngine {
 }
 ```
 
-#### 2. Security Controller
+#### 2. Security Controller（現在の実装）
+
+**現在の実装（Python/Flask）:**
+```python
+def generate_secure_token(user_id: str, session_id: str) -> str:
+    """セキュアなトークンを生成（HMAC-SHA256）"""
+    timestamp = str(int(datetime.now().timestamp()))
+    message = f"{user_id}:{session_id}:{timestamp}"
+    signature = hmac.new(
+        SECRET_KEY.encode(),
+        message.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    return base64.b64encode(f"{message}:{signature}".encode()).decode()
+
+def verify_token(token: str) -> dict:
+    """トークンを検証（24時間有効期限）"""
+    # トークン検証ロジック
+    # 署名検証、有効期限チェック
+```
+
+**Phase 2での拡張予定:**
 ```typescript
 interface SecurityController {
   // 認証・認可
@@ -78,7 +157,7 @@ interface SecurityController {
   validateSession(token: AuthToken): Promise<boolean>;
   checkPermission(user: User, resource: Resource): boolean;
   
-  // 暗号化
+  // 暗号化（AES-256-GCM）
   encryptData(data: any): EncryptedData;
   decryptData(encryptedData: EncryptedData): any;
   
@@ -88,7 +167,11 @@ interface SecurityController {
 }
 ```
 
-#### 3. AI Assistant
+#### 3. AI Assistant（Phase 3 - 将来実装）
+
+**現状:** 未実装。Phase 3以降で検討。
+
+**Phase 3での実装予定:**
 ```typescript
 interface AIAssistant {
   // レイアウト最適化
@@ -105,10 +188,33 @@ interface AIAssistant {
 }
 ```
 
+**技術スタック候補:**
+- TensorFlow.js（クライアントサイド推論）
+- OpenAI API（サーバーサイド処理）
+- ローカルLLM（プライバシー重視の場合）
+
 ## Components and Interfaces
 
 ### 1. Enhanced Window Manager
 
+**現在の実装（WindowManager2D）:**
+```typescript
+const WindowManager2D: React.FC<{
+  menus: MenuItem[];
+  camera: CameraState;
+  onMenuSizeChange: (index: number, width: number, height: number) => void;
+  onMenuPositionChange: (index: number, x: number, y: number) => void;
+  onOpenInBrowser: (url: string) => void;
+  onSyncSession: (appId: string) => void;
+  onStopCapture: (streamId: string) => void;
+  onCameraChange: (camera: CameraState) => void;
+}> = ({ ... }) => {
+  // カメラドラッグ、ズーム処理
+  // ウィンドウのレンダリング
+};
+```
+
+**Phase 2での拡張予定:**
 ```typescript
 interface EnhancedWindowManager extends WindowManager2D {
   // リモート操作
@@ -122,10 +228,6 @@ interface EnhancedWindowManager extends WindowManager2D {
   // 俯瞰ビュー
   enterOverviewMode(): void;
   exitOverviewMode(): void;
-  
-  // AI統合
-  applyAISuggestion(suggestion: LayoutSuggestion): void;
-  enableAutoOptimization(enabled: boolean): void;
 }
 ```
 
@@ -421,24 +523,68 @@ security:
 
 ## Migration Strategy
 
-### Phase 1: Core Infrastructure
-- WebRTC DataChannel implementation
-- Basic remote control functionality
-- Security framework setup
+### Phase 1: 基本機能の完成（現在）
+**目標:** 既存機能の安定化とリモート操作の基礎実装
 
-### Phase 2: Enhanced Features
-- AI assistant integration
-- Task management system
-- Collaboration features
+**実装項目:**
+1. リモート操作イベントの送信・受信機能の完成
+2. Chrome拡張機能またはElectronアプリでの操作実行
+3. セキュリティトークンの強化
+4. 基本的な監査ログ機能
+5. パフォーマンス最適化（3-5ストリーム対応）
 
-### Phase 3: Enterprise Features
-- Advanced security controls
-- Compliance reporting
-- Mobile applications
+**技術的課題:**
+- ブラウザセキュリティポリシーの制約
+- クロスオリジン操作の制限
+- Electronプロセスとの通信
 
-### Phase 4: AI Optimization
-- Machine learning models
-- Predictive analytics
-- Automated optimization
+### Phase 2: 高度な機能の追加
+**目標:** エンタープライズグレードの機能追加
 
-This design provides a comprehensive foundation for implementing the Interactive WebRTC Workspace that addresses all the identified challenges while maintaining scalability, security, and user experience excellence.
+**実装項目:**
+1. WebRTC DataChannelの実装
+2. エンドツーエンド暗号化（AES-256-GCM）
+3. OAuth 2.0統合（Gmail、GitHub、Notion、Slack）
+4. ウィンドウグループ化機能
+5. 俯瞰モード・グリッド表示
+6. パフォーマンス最適化（10+ストリーム対応）
+
+### Phase 3: AI・モバイル対応
+**目標:** 差別化機能の追加
+
+**実装項目:**
+1. AI支援機能（レイアウト最適化、情報抽出）
+2. モバイルアプリ開発（React Native）
+3. 企業向け管理ダッシュボード
+4. 高度な監査・コンプライアンス機能
+5. タスク管理システム統合
+
+### Phase 4: スケーリングと最適化
+**目標:** エンタープライズ展開
+
+**実装項目:**
+1. Kubernetes対応
+2. 負荷分散とオートスケーリング
+3. 高度なセキュリティ機能
+4. 機械学習モデルの最適化
+5. グローバル展開対応
+
+## 技術的な実装優先順位
+
+### 最優先（Phase 1）
+1. リモート操作の実際の実行機能
+2. Chrome拡張機能の開発
+3. セキュリティの強化
+4. 基本的なログ機能
+
+### 次の優先（Phase 2）
+1. WebRTC DataChannel
+2. OAuth 2.0統合
+3. エンドツーエンド暗号化
+4. ウィンドウグループ化
+
+### 将来の実装（Phase 3+）
+1. AI機能
+2. モバイルアプリ
+3. 管理ダッシュボード
+4. タスク管理統合
