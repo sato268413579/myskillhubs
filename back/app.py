@@ -12,6 +12,8 @@ from feature.trendSearch.routes import trend_search_bp
 from feature.three3duxPractice.routes import three_d_bp
 from feature.sessionSync.routes import session_sync_bp
 from feature.electronCapture.routes import electron_capture_bp
+from feature.constructionSchedule.routes import construction_schedule_bp
+from feature.userService.routes import user_service_bp
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
@@ -37,6 +39,8 @@ app.register_blueprint(trend_search_bp)
 app.register_blueprint(three_d_bp)
 app.register_blueprint(session_sync_bp)
 app.register_blueprint(electron_capture_bp)
+app.register_blueprint(construction_schedule_bp)
+app.register_blueprint(user_service_bp)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

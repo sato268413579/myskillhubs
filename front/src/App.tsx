@@ -8,6 +8,9 @@ import Tasks from "./pages/TaskManager";
 import TrendSearch from "./pages/TrendSearch";
 import Menu3D from "./pages/3DUXPractice";
 import MyCustomApp from "./pages/MyCustomApp";
+import ConstructionSchedule from "./pages/ConstructionSchedule";
+import GanttChart from "./pages/GanttChart";
+import ServiceSettings from "./pages/ServiceSettings";
 
 const sampleMenus = [
   { name: "Dashboard", content: '', x: 10, y: 0, z: 0 },
@@ -32,6 +35,9 @@ const App: React.FC = () => {
       <Route path="/service/tasks" element={loggedIn ? <Tasks /> : <Navigate to="/login" />} />
       <Route path="/service/aiSearch" element={loggedIn ? <TrendSearch /> : <Navigate to="/login" />} />
       <Route path="/service/3d" element={loggedIn ? <Menu3D menus={sampleMenus} /> : <Navigate to="/login" />} />
+      <Route path="/service/construction-schedule" element={loggedIn ? <ConstructionSchedule /> : <Navigate to="/login" />} />
+      <Route path="/service/construction-schedule/:projectId" element={loggedIn ? <GanttChart /> : <Navigate to="/login" />} />
+      <Route path="/service/settings" element={loggedIn ? <ServiceSettings /> : <Navigate to="/login" />} />
     </Routes>
   );
 };

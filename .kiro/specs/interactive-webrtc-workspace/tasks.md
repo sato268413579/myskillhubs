@@ -1,310 +1,308 @@
 # Implementation Plan - Interactive WebRTC Workspace
 
-## Phase 1: Core Remote Control Infrastructure
+## プロジェクト概要
 
-- [ ] 1. WebRTC DataChannel Setup
-  - Implement bidirectional DataChannel communication
-  - Add connection state management and error handling
-  - Create message serialization/deserialization system
-  - _Requirements: 1.1, 1.2_
+本実装計画は、個人開発プロジェクト「MySkillHubs」内のPoC機能である「2D WebRTCウィンドウマネージャー」の機能拡張タスクを定義します。
 
-- [ ] 2. Remote Input Event System
-  - [ ] 2.1 Mouse Event Capture and Transmission
-    - Capture mouse events (click, move, drag) on captured video
-    - Convert screen coordinates to target tab coordinates
-    - Implement event serialization and encryption
-    - _Requirements: 1.1_
+**MySkillHubsについて:**
+- タスク管理、CRM、AI情報収集、WebRTCウィンドウマネージャーなど複数のPoC機能を統合
+- React + TypeScript（フロントエンド）、Flask（バックエンド）で構築
+- 個人開発による実験的プロジェクト
 
-  - [ ] 2.2 Keyboard Event Handling
-    - Capture keyboard input with proper focus management
-    - Implement secure key event transmission
-    - Add input validation and sanitization
-    - _Requirements: 1.3_
+## 現在の実装状況サマリー
 
-  - [ ] 2.3 Scroll and Touch Event Support
-    - Implement scroll wheel event capture and transmission
-    - Add touch event support for mobile devices
-    - Create gesture recognition for common actions
-    - _Requirements: 1.2_
+### ✅ 完了済み（既存機能）
+- **2Dウィンドウマネージャー**: ドラッグ、リサイズ、カメラ操作（パン、ズーム）
+- **WebRTCタブキャプチャ**: getDisplayMedia APIによるリアルタイムストリーミング
+- **Electronキャプチャ**: 基礎構造（モックモード対応）
+- **セッション同期API**: Gmail、GitHub、Notion、Slack対応
+- **セキュアトークン**: HMAC-SHA256による生成・検証
+- **操作イベント送信**: InteractiveTabCaptureコンポーネントの基礎構造
+- **WebAppPreviewCard**: Webアプリプレビューとクイックアクション
 
-- [ ] 3. Event Execution Engine
-  - [ ] 3.1 Browser Extension for Event Injection
-    - Create Chrome/Firefox extension for event injection
-    - Implement secure communication with main application
-    - Add permission management and validation
+### 🚧 実装中・改善が必要
+- **リモート操作実行**: Chrome拡張機能またはElectronアプリが必要
+- **エンドツーエンド暗号化**: AES-256-GCM実装
+- **OAuth 2.0統合**: 実際の認証フロー
+- **包括的な監査ログ**: データベース保存とログ検索
+- **パフォーマンス最適化**: 複数ストリーム対応
+
+### ❌ 未実装（将来実装）
+- **WebRTC DataChannel**: 双方向通信
+- **AI支援機能**: レイアウト最適化、情報抽出
+- **モバイルアプリ**: React Native対応
+- **企業向け管理機能**: 管理ダッシュボード、コンプライアンス
+
+---
+
+## Phase 1: 基本機能の完成（優先度：高）
+
+- [ ] 1. Chrome拡張機能の開発
+  - Manifest V3対応の拡張機能プロジェクト作成
+  - Content Scriptでの操作イベント受信
+  - Background Serviceでのメッセージング
+  - タブへの操作実行機能（クリック、スクロール）
+  - _Requirements: 1.1, 1.2, 1.3_
+
+- [ ] 2. リモート操作実行機能の完成
+  - [ ] 2.1 バックエンドAPIの強化
+    - `/api/service/3d/send-interaction`の完全実装
+    - 操作イベントのキューイング機能
+    - エラーハンドリングとリトライ機能
+    - _Requirements: 1.1, 1.2_
+
+  - [ ] 2.2 Chrome拡張機能との通信
+    - WebSocket接続の確立
+    - メッセージプロトコルの定義
+    - 操作イベントの転送機能
+    - _Requirements: 1.3, 1.4_
+
+  - [ ] 2.3 操作実行のテストとデバッグ
+    - 座標変換の正確性検証
+    - 遅延測定とログ記録
+    - エラーケースのテスト
     - _Requirements: 1.4, 1.5_
 
-  - [ ] 3.2 Cross-Origin Security Handling
-    - Implement CORS policy management
-    - Add domain whitelist/blacklist functionality
-    - Create secure iframe communication bridge
-    - _Requirements: 1.5, 2.5_
+- [ ] 3. セキュリティ機能の強化
+  - [ ] 3.1 トークン管理の改善
+    - トークンのリフレッシュ機能
+    - セッション有効期限の管理
+    - 不正トークンの検出とブロック
+    - _Requirements: 2.1, 2.2_
 
-## Phase 2: Security and Privacy Framework
+  - [ ] 3.2 監査ログの実装
+    - すべての操作イベントのログ記録
+    - ログのデータベース保存
+    - ログ検索・フィルタリング機能
+    - _Requirements: 2.4_
 
-- [ ] 4. End-to-End Encryption Implementation
-  - [ ] 4.1 Encryption Key Management
-    - Implement AES-256-GCM encryption for DataChannel
-    - Create secure key exchange mechanism
-    - Add key rotation and lifecycle management
-    - _Requirements: 2.1, 2.6_
+  - [ ] 3.3 HTTPS強制とCSRF対策
+    - HTTPS接続の強制
+    - CSRFトークンの実装
+    - セキュアCookie設定
+    - _Requirements: 2.5, 2.6_
 
-  - [ ] 4.2 Authentication and Authorization
-    - Integrate OAuth 2.0 + OpenID Connect
-    - Implement multi-factor authentication (MFA)
-    - Create role-based access control (RBAC) system
-    - _Requirements: 2.2, 2.5_
-
-- [ ] 5. Privacy Protection Features
-  - [ ] 5.1 Data Masking and Redaction
-    - Implement automatic PII detection and masking
-    - Create configurable redaction rules
-    - Add real-time content filtering
-    - _Requirements: 2.3_
-
-  - [ ] 5.2 Audit Logging and Compliance
-    - Create comprehensive activity logging system
-    - Implement GDPR-compliant data handling
-    - Add SOC2 compliance reporting features
-    - _Requirements: 2.4, 2.6_
-
-## Phase 3: Multi-Window Management and Overview
-
-- [ ] 6. Enhanced Window Manager
-  - [ ] 6.1 Window Grouping System
-    - Implement drag-and-drop window grouping
-    - Create group-based layout management
-    - Add group naming and color coding
-    - _Requirements: 3.3_
-
-  - [ ] 6.2 Overview Mode Implementation
-    - Create grid-based overview layout
-    - Implement smooth zoom transitions
-    - Add thumbnail generation for inactive windows
-    - _Requirements: 3.2_
-
-- [ ] 7. Activity Monitoring and Notifications
-  - [ ] 7.1 Real-time Activity Detection
-    - Implement content change detection
-    - Create activity scoring algorithm
-    - Add visual notification system
-    - _Requirements: 3.4_
-
-  - [ ] 7.2 Performance Monitoring
-    - Monitor CPU/memory usage per stream
-    - Implement automatic quality adjustment
-    - Create resource usage dashboard
-    - _Requirements: 3.5, 6.3_
-
-## Phase 4: Task Integration and Workflow
-
-- [ ] 8. Task Management Integration
-  - [ ] 8.1 Task-Window Linking System
-    - Create task creation and management UI
-    - Implement window-to-task association
-    - Add automatic window opening for tasks
-    - _Requirements: 4.1_
-
-  - [ ] 8.2 Workflow Automation
-    - Implement workflow definition system
-    - Create automatic layout adjustment based on task status
-    - Add deadline-based visual indicators
-    - _Requirements: 4.2, 4.3_
-
-- [ ] 9. Collaboration Features
-  - [ ] 9.1 Real-time Collaboration
-    - Implement shared workspace functionality
-    - Create real-time cursor and activity sharing
-    - Add collaborative editing support
-    - _Requirements: 4.4_
-
-  - [ ] 9.2 Communication Integration
-    - Add in-workspace messaging system
-    - Implement voice/video chat integration
-    - Create notification and alert system
-    - _Requirements: 4.4_
-
-## Phase 5: AI Assistant and Optimization
-
-- [ ] 10. AI Learning Engine
-  - [ ] 10.1 User Behavior Analysis
-    - Implement user activity tracking
-    - Create behavior pattern recognition
-    - Add productivity metrics calculation
-    - _Requirements: 5.1_
-
-  - [ ] 10.2 Layout Optimization AI
-    - Develop layout suggestion algorithm
-    - Implement automatic layout optimization
-    - Create A/B testing for layout effectiveness
-    - _Requirements: 5.1, 5.3_
-
-- [ ] 11. Intelligent Content Analysis
-  - [ ] 11.1 Important Information Detection
-    - Implement OCR for text extraction
-    - Create importance scoring algorithm
-    - Add automatic highlighting system
-    - _Requirements: 5.2_
-
-  - [ ] 11.2 Anomaly Detection
-    - Implement unusual activity detection
-    - Create security alert system
-    - Add predictive maintenance features
-    - _Requirements: 5.5_
-
-## Phase 6: Performance and Scalability
-
-- [ ] 12. Performance Optimization
-  - [ ] 12.1 Stream Quality Management
-    - Implement adaptive bitrate streaming
-    - Create network condition monitoring
-    - Add automatic quality adjustment
+- [ ] 4. パフォーマンス最適化
+  - [ ] 4.1 ストリーム管理の改善
+    - 非アクティブストリームの自動停止
+    - メモリリーク対策
+    - リソース使用量のモニタリング
     - _Requirements: 6.1, 6.2_
 
-  - [ ] 12.2 Resource Management
-    - Implement CPU/memory optimization
-    - Create stream prioritization system
-    - Add garbage collection optimization
-    - _Requirements: 6.3, 6.4_
+  - [ ] 4.2 UI/UXの改善
+    - ローディング状態の表示
+    - エラーメッセージの改善
+    - キーボードショートカットの追加
+    - _Requirements: 3.1, 3.2_
 
-- [ ] 13. Scalability Infrastructure
-  - [ ] 13.1 Load Balancing and Clustering
-    - Implement horizontal scaling support
-    - Create load balancer configuration
-    - Add health monitoring and failover
-    - _Requirements: 6.5_
+  - [ ] 4.3 テストとドキュメント
+    - ユニットテストの追加
+    - 統合テストの実装
+    - ユーザーマニュアルの作成
+    - _Requirements: All_
 
-  - [ ] 13.2 Caching and Data Management
-    - Implement Redis-based session caching
-    - Create efficient data synchronization
-    - Add database optimization
-    - _Requirements: 6.4_
+---
 
-## Phase 7: Enterprise Management
+## Phase 2: 高度な機能の追加（優先度：中）
 
-- [ ] 14. Administrative Dashboard
-  - [ ] 14.1 User Management System
-    - Create admin dashboard for user management
-    - Implement organization hierarchy support
-    - Add bulk user operations
-    - _Requirements: 7.1, 7.4_
+- [ ] 5. WebRTC DataChannelの実装
+  - [ ] 5.1 DataChannel接続の確立
+    - PeerConnection設定
+    - DataChannelの作成と管理
+    - 接続状態の監視
+    - _Requirements: 1.1, 1.2_
 
-  - [ ] 14.2 Policy Management
-    - Implement security policy configuration
-    - Create automated policy enforcement
-    - Add policy violation reporting
-    - _Requirements: 7.2_
+  - [ ] 5.2 メッセージング機能
+    - 双方向メッセージング
+    - メッセージのシリアライゼーション
+    - エラーハンドリング
+    - _Requirements: 1.3, 1.4_
 
-- [ ] 15. Compliance and Reporting
-  - [ ] 15.1 Audit Trail System
-    - Create comprehensive audit logging
-    - Implement audit report generation
-    - Add compliance dashboard
-    - _Requirements: 7.3_
+- [ ] 6. エンドツーエンド暗号化
+  - [ ] 6.1 暗号化キー管理
+    - AES-256-GCM暗号化の実装
+    - 鍵交換メカニズム
+    - 鍵のローテーション
+    - _Requirements: 2.1, 2.6_
 
-  - [ ] 15.2 Security Incident Management
-    - Implement incident detection and response
-    - Create escalation procedures
-    - Add forensic analysis tools
-    - _Requirements: 7.5_
+  - [ ] 6.2 暗号化通信の実装
+    - DataChannelでの暗号化通信
+    - 操作イベントの暗号化
+    - 復号化とバリデーション
+    - _Requirements: 2.1, 2.6_
 
-## Phase 8: Mobile and Cross-Platform
+- [ ] 7. OAuth 2.0統合
+  - [ ] 7.1 OAuth 2.0フローの実装
+    - 認可コードフロー
+    - トークン取得と更新
+    - ユーザー情報の取得
+    - _Requirements: 2.2, 4.1_
 
-- [ ] 16. Mobile Application Development
-  - [ ] 16.1 React Native Mobile App
-    - Create mobile-optimized UI components
-    - Implement touch-based interactions
-    - Add mobile-specific performance optimizations
+  - [ ] 7.2 各サービスとの統合
+    - Gmail API統合
+    - GitHub API統合
+    - Notion API統合
+    - Slack API統合
+    - _Requirements: 4.1, 4.2_
+
+- [ ] 8. ウィンドウ管理機能の拡張
+  - [ ] 8.1 ウィンドウグループ化
+    - ドラッグ&ドロップでのグループ化
+    - グループ名と色の設定
+    - グループ単位での操作
+    - _Requirements: 3.3_
+
+  - [ ] 8.2 俯瞰モード・グリッド表示
+    - グリッドレイアウトの実装
+    - スムーズなズーム遷移
+    - サムネイル生成
+    - _Requirements: 3.2_
+
+  - [ ] 8.3 アクティビティ監視
+    - コンテンツ変更検出
+    - 視覚的な通知システム
+    - アクティビティログ
+    - _Requirements: 3.4_
+
+---
+
+## Phase 3: AI・モバイル対応（優先度：低）
+
+- [ ] 9. AI支援機能
+  - [ ] 9.1 レイアウト最適化
+    - ユーザー行動データの収集
+    - 機械学習モデルの訓練
+    - レイアウト提案機能
+    - _Requirements: 5.1, 5.3_
+
+  - [ ] 9.2 情報抽出
+    - OCRによるテキスト抽出
+    - 重要情報の検出
+    - 自動ハイライト機能
+    - _Requirements: 5.2_
+
+- [ ] 10. モバイルアプリ開発
+  - [ ] 10.1 React Nativeアプリ
+    - モバイルUI/UXの設計
+    - タッチ操作の実装
+    - モバイル最適化
     - _Requirements: 8.1, 8.2_
 
-  - [ ] 16.2 Offline Capability
-    - Implement local data caching
-    - Create offline mode functionality
-    - Add automatic synchronization on reconnect
+  - [ ] 10.2 オフライン機能
+    - Service Workerの実装
+    - ローカルキャッシュ
+    - 自動同期機能
     - _Requirements: 8.3, 8.4_
 
-- [ ] 17. Cross-Platform Compatibility
-  - [ ] 17.1 Browser Compatibility
-    - Ensure compatibility across major browsers
-    - Implement feature detection and fallbacks
-    - Add progressive enhancement
-    - _Requirements: 8.1_
+- [ ] 11. 企業向け管理機能（Phase 3+）
+  - [ ] 11.1 管理ダッシュボード
+    - ユーザー管理UI
+    - 使用状況の可視化
+    - ポリシー管理
+    - _Requirements: 7.1, 7.2_
 
-  - [ ] 17.2 Operating System Support
-    - Test and optimize for Windows/macOS/Linux
-    - Implement OS-specific optimizations
-    - Add native integration where possible
-    - _Requirements: 8.1_
+  - [ ] 11.2 コンプライアンス機能
+    - 監査レポート生成
+    - GDPR対応機能
+    - セキュリティインシデント管理
+    - _Requirements: 7.3, 7.5_
 
-## Phase 9: Testing and Quality Assurance
+---
 
-- [ ] 18. Comprehensive Testing Suite
-  - [ ] 18.1 Unit and Integration Tests
-    - Create unit tests for all core components
-    - Implement integration tests for WebRTC functionality
-    - Add security testing for encryption and authentication
+## テストとデプロイメント
+
+- [ ] 12. テスト戦略
+  - [ ] 12.1 ユニットテスト
+    - Reactコンポーネントのテスト
+    - バックエンドAPIのテスト
+    - セキュリティ機能のテスト
     - _Requirements: All_
 
-  - [ ] 18.2 Performance and Load Testing
-    - Implement latency and throughput testing
-    - Create load testing for concurrent users
-    - Add stress testing for resource limits
-    - _Requirements: 6.1-6.5_
-
-- [ ] 19. Security and Penetration Testing
-  - [ ] 19.1 Security Vulnerability Assessment
-    - Conduct penetration testing
-    - Implement security code review
-    - Add automated security scanning
-    - _Requirements: 2.1-2.6_
-
-  - [ ] 19.2 Compliance Validation
-    - Validate GDPR compliance
-    - Test SOC2 requirements
-    - Add compliance reporting
-    - _Requirements: 2.6_
-
-## Phase 10: Deployment and Monitoring
-
-- [ ] 20. Production Deployment
-  - [ ] 20.1 Kubernetes Deployment Setup
-    - Create Kubernetes manifests
-    - Implement auto-scaling configuration
-    - Add health checks and monitoring
+  - [ ] 12.2 統合テスト
+    - エンドツーエンドテスト
+    - WebRTC機能のテスト
+    - パフォーマンステスト
     - _Requirements: All_
 
-  - [ ] 20.2 CI/CD Pipeline
-    - Implement automated testing pipeline
-    - Create deployment automation
-    - Add rollback procedures
+- [ ] 13. デプロイメント
+  - [ ] 13.1 本番環境の準備
+    - HTTPS設定
+    - 環境変数の管理
+    - データベースのセットアップ
     - _Requirements: All_
 
-- [ ] 21. Monitoring and Analytics
-  - [ ] 21.1 Real-time Monitoring Dashboard
-    - Create performance monitoring dashboard
-    - Implement alerting system
-    - Add user analytics tracking
+  - [ ] 13.2 CI/CDパイプライン
+    - 自動テストの実行
+    - 自動デプロイメント
+    - ロールバック手順
     - _Requirements: All_
 
-  - [ ] 21.2 Business Intelligence
-    - Implement usage analytics
-    - Create productivity metrics reporting
-    - Add ROI calculation tools
-    - _Requirements: 5.1-5.5_
+---
 
 ## Success Metrics and Validation
 
-Each phase should be validated against the following success criteria:
-- **Latency**: Remote operations complete within 100ms
-- **Security**: Zero security incidents during testing
-- **Performance**: Support 10+ concurrent streams at 30fps
-- **Usability**: User task completion rate >90%
-- **Reliability**: System uptime >99.9%
+### Phase 1の成功基準
+- **機能性**: リモート操作が実際に動作する
+- **セキュリティ**: トークン認証が正しく機能する
+- **パフォーマンス**: 3-5個のストリームで快適に動作
+- **ユーザビリティ**: 直感的なUI/UX
+- **安定性**: 長時間使用でもクラッシュしない
+
+### Phase 2の成功基準
+- **遅延**: リモート操作の遅延が500ms以下
+- **セキュリティ**: エンドツーエンド暗号化が機能
+- **パフォーマンス**: 10個以上のストリームで30fps維持
+- **統合**: OAuth連携が正しく動作
+- **機能**: グループ化、俯瞰モードが使える
+
+### Phase 3の成功基準
+- **AI機能**: 基本的なAI支援が動作
+- **モバイル**: モバイルアプリが使える
+- **管理**: 管理ダッシュボードが機能
+- **ユーザー満足度**: NPS 60以上
+- **採用率**: 月間10%成長
 
 ## Risk Mitigation
 
-- **Technical Risk**: Implement proof-of-concept for critical WebRTC features early
-- **Security Risk**: Conduct security reviews at each phase
-- **Performance Risk**: Continuous performance testing and optimization
-- **User Adoption Risk**: Regular user feedback and iterative improvements
-- **Compliance Risk**: Legal review of privacy and security implementations
+### 技術的リスク
+- **対策**: 早期にPoCを実装し、技術的実現可能性を検証
+- **Chrome拡張機能の制約**: Manifest V3の制限を理解し、代替案を準備
+- **WebRTCの複雑性**: 段階的に実装し、各ステップで検証
+
+### セキュリティリスク
+- **対策**: 各フェーズでセキュリティレビューを実施
+- **脆弱性**: 定期的なペネトレーションテスト
+- **データ保護**: HTTPS強制、暗号化の徹底
+
+### パフォーマンスリスク
+- **対策**: 継続的なパフォーマンステストと最適化
+- **リソース管理**: メモリリーク対策、ガベージコレクション
+- **スケーラビリティ**: 段階的な負荷テスト
+
+### ユーザー採用リスク
+- **対策**: 定期的なユーザーフィードバックと改善
+- **ドキュメント**: 充実したユーザーマニュアル
+- **サポート**: 問い合わせ対応体制の整備
+
+## 次のステップ
+
+### 最優先タスク（今すぐ開始）
+1. Chrome拡張機能プロジェクトの作成
+2. リモート操作実行機能の完成
+3. セキュリティ機能の強化
+4. 基本的なテストの実装
+
+### 短期目標（1-2ヶ月）
+- Phase 1の完了
+- 基本的なリモート操作機能の動作確認
+- セキュリティの基本実装
+
+### 中期目標（3-6ヶ月）
+- Phase 2の開始と進行
+- WebRTC DataChannelの実装
+- OAuth 2.0統合
+
+### 長期目標（6ヶ月以上）
+- Phase 3の計画と実装
+- AI機能の追加
+- モバイルアプリ開発
