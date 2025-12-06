@@ -8,7 +8,6 @@
 .env
 package-lock.json
 build/*
-nginx/*
 
 # testing
 /coverage
