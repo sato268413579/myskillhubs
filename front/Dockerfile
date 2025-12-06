@@ -1,4 +1,5 @@
-FROM node:18
+# ビルドステージ
+FROM node:18 AS build
 
 WORKDIR /app
 
@@ -9,5 +10,17 @@ RUN npm install
 # ソースコードをコピー
 COPY . .
 
-EXPOSE 3000
-CMD ["npm", "start"]
+# 本番用ビルド
+RUN npm run build
+
+# 本番ステージ - Nginx
+FROM nginx:alpine
+
+# ビルドされたファイルをNginxのドキュメントルートにコピー
+COPY --from=build /app/build /usr/share/nginx/html
+
+# カスタムNginx設定があればコピー
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
