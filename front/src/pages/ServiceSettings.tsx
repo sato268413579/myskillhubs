@@ -1,3 +1,4 @@
+import API_BASE_URL from "../config/api";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,7 +25,7 @@ const ServiceSettings: React.FC = () => {
 
   const loadServices = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/user-services/all-services', {
+      const response = await fetch(`${API_BASE_URL}/api/user-services/all-services`, {
         credentials: 'include'
       });
       const data = await response.json();
