@@ -1,50 +1,35 @@
-import API_BASE_URL from "../config/api";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { getMyServices, ServiceItem } from "../services/userService";
+import { currentUser } from "../services/login";
 import "../css/Service.css";
-
-// サービス型定義
-interface ServiceItem {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  path: string;
-  tags: string[];
-  status: "active" | "beta" | "down";
-}
 
 const Service: React.FC = () => {
   const navigate = useNavigate();
   const [services, setServices] = React.useState<ServiceItem[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [isAdmin, setIsAdmin] = React.useState(false);
 
   // ユーザーが利用可能なサービスを取得
   React.useEffect(() => {
-    const fetchServices = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/user-services/my-services`, {
-          credentials: 'include'
-        });
-        const data = await response.json();
+        // 管理者チェック
+        const user = await currentUser();
+        setIsAdmin(user.id === 1);
         
-        if (data.success) {
-          setServices(data.services);
-        } else {
-          console.error('サービス取得エラー:', data.error);
-          // エラー時はデフォルトサービスを表示
-          setServices([]);
-        }
+        // サービス一覧を取得
+        const data = await getMyServices();
+        setServices(data);
       } catch (error) {
         console.error('サービス取得エラー:', error);
-        // エラー時はデフォルトサービスを表示
         setServices([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchServices();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -62,24 +47,26 @@ const Service: React.FC = () => {
     <main className="service-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <h1 className="service-title" style={{ margin: 0 }}>サービス一覧</h1>
-        <button
-          onClick={() => navigate('/service/settings')}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#4F46E5',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '600',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          ⚙️ サービス設定
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => navigate('/service/settings')}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#4F46E5',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            ⚙️ サービス設定
+          </button>
+        )}
       </div>
       {services.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '50px' }}>
@@ -90,30 +77,30 @@ const Service: React.FC = () => {
       ) : (
         <div className="service-grid">
           {services.map((svc) => (
-          <div
-            key={svc.id}
-            className={`service-card ${svc.status}`}
-            onClick={() => svc.path !== "#" && navigate(svc.path)}
-          >
-            <div className="card-header">
-              <div className="card-icon">{svc.icon}</div>
-              <span className={`badge ${svc.status}`}>
-                {svc.status === "active"
-                  ? "稼働中"
-                  : svc.status === "beta"
-                    ? "β版"
-                    : "停止中"}
-              </span>
+            <div
+              key={svc.id}
+              className={`service-card ${svc.status}`}
+              onClick={() => svc.path !== "#" && navigate(svc.path)}
+            >
+              <div className="card-header">
+                <div className="card-icon">{svc.icon}</div>
+                <span className={`badge ${svc.status}`}>
+                  {svc.status === "active"
+                    ? "稼働中"
+                    : svc.status === "beta"
+                      ? "β版"
+                      : "停止中"}
+                </span>
+              </div>
+              <h2 className="card-title">{svc.name}</h2>
+              <p className="card-desc">{svc.description}</p>
+              <ul className="card-tags">
+                {svc.tags.map((tag) => (
+                  <li key={tag}>{tag}</li>
+                ))}
+              </ul>
             </div>
-            <h2 className="card-title">{svc.name}</h2>
-            <p className="card-desc">{svc.description}</p>
-            <ul className="card-tags">
-              {svc.tags.map((tag) => (
-                <li key={tag}>{tag}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
+          ))}
         </div>
       )}
     </main>

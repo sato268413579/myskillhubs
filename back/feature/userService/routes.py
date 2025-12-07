@@ -84,16 +84,50 @@ def get_my_services():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@user_service_bp.route('/all-services', methods=['GET'])
+@user_service_bp.route('/all-users', methods=['GET'])
 @login_required
-def get_all_services():
-    """全サービス一覧とユーザーの利用状況を取得（管理者用）"""
+def get_all_users():
+    """全ユーザー一覧を取得（管理者専用）"""
     try:
-        # ユーザーロールをチェック（将来実装）
-        # 現在は全ユーザーが自分のサービス状況を確認可能
+        # 管理者チェック（id=1のみ許可）
+        if current_user.id != 1:
+            return jsonify({'success': False, 'error': '管理者権限が必要です'}), 403
+        
+        from models.User import User
+        users = User.query.all()
+        
+        user_list = []
+        for user in users:
+            user_list.append({
+                'id': user.id,
+                'username': user.username
+            })
+        
+        return jsonify({
+            'success': True,
+            'users': user_list
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@user_service_bp.route('/user/<int:user_id>/services', methods=['GET'])
+@login_required
+def get_user_services(user_id):
+    """特定ユーザーのサービス一覧を取得（管理者専用）"""
+    try:
+        # 管理者チェック（id=1のみ許可）
+        if current_user.id != 1:
+            return jsonify({'success': False, 'error': '管理者権限が必要です'}), 403
+        
+        # ユーザーの存在確認
+        from models.User import User
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'success': False, 'error': 'ユーザーが見つかりません'}), 404
         
         # ユーザーのサービス権限を取得
-        user_services = UserService.query.filter_by(user_id=current_user.id).all()
+        user_services = UserService.query.filter_by(user_id=user_id).all()
         user_service_map = {us.service_id: us.is_enabled for us in user_services}
         
         # 全サービス情報を構築
@@ -106,6 +140,10 @@ def get_all_services():
         
         return jsonify({
             'success': True,
+            'user': {
+                'id': user.id,
+                'username': user.username
+            },
             'services': services,
             'total_count': len(services)
         })
@@ -113,18 +151,28 @@ def get_all_services():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@user_service_bp.route('/enable/<service_id>', methods=['POST'])
+@user_service_bp.route('/user/<int:user_id>/enable/<service_id>', methods=['POST'])
 @login_required
-def enable_service(service_id):
-    """サービスを有効化（管理者またはユーザー自身）"""
+def enable_service(user_id, service_id):
+    """特定ユーザーのサービスを有効化（管理者専用）"""
     try:
+        # 管理者チェック（id=1のみ許可）
+        if current_user.id != 1:
+            return jsonify({'success': False, 'error': '管理者権限が必要です'}), 403
+        
+        # ユーザーの存在確認
+        from models.User import User
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'success': False, 'error': 'ユーザーが見つかりません'}), 404
+        
         # サービスIDの検証
         if service_id not in AVAILABLE_SERVICES:
             return jsonify({'success': False, 'error': '無効なサービスIDです'}), 400
         
         # 既存のレコードを確認
         user_service = UserService.query.filter_by(
-            user_id=current_user.id,
+            user_id=user_id,
             service_id=service_id
         ).first()
         
@@ -134,7 +182,7 @@ def enable_service(service_id):
         else:
             # 新規レコードを作成
             user_service = UserService(
-                user_id=current_user.id,
+                user_id=user_id,
                 service_id=service_id,
                 is_enabled=True
             )
@@ -144,7 +192,7 @@ def enable_service(service_id):
         
         return jsonify({
             'success': True,
-            'message': f'{AVAILABLE_SERVICES[service_id]["name"]}を有効化しました',
+            'message': f'{user.username}の{AVAILABLE_SERVICES[service_id]["name"]}を有効化しました',
             'service': user_service.to_dict()
         })
     except Exception as e:
@@ -152,18 +200,28 @@ def enable_service(service_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@user_service_bp.route('/disable/<service_id>', methods=['POST'])
+@user_service_bp.route('/user/<int:user_id>/disable/<service_id>', methods=['POST'])
 @login_required
-def disable_service(service_id):
-    """サービスを無効化（管理者またはユーザー自身）"""
+def disable_service(user_id, service_id):
+    """特定ユーザーのサービスを無効化（管理者専用）"""
     try:
+        # 管理者チェック（id=1のみ許可）
+        if current_user.id != 1:
+            return jsonify({'success': False, 'error': '管理者権限が必要です'}), 403
+        
+        # ユーザーの存在確認
+        from models.User import User
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'success': False, 'error': 'ユーザーが見つかりません'}), 404
+        
         # サービスIDの検証
         if service_id not in AVAILABLE_SERVICES:
             return jsonify({'success': False, 'error': '無効なサービスIDです'}), 400
         
         # 既存のレコードを確認
         user_service = UserService.query.filter_by(
-            user_id=current_user.id,
+            user_id=user_id,
             service_id=service_id
         ).first()
         
@@ -173,7 +231,7 @@ def disable_service(service_id):
             
             return jsonify({
                 'success': True,
-                'message': f'{AVAILABLE_SERVICES[service_id]["name"]}を無効化しました',
+                'message': f'{user.username}の{AVAILABLE_SERVICES[service_id]["name"]}を無効化しました',
                 'service': user_service.to_dict()
             })
         else:
