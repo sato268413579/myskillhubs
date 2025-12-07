@@ -25,7 +25,7 @@ const ServiceSettings: React.FC = () => {
 
   const loadServices = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/user-services/all-services`, {
+      const response = await fetch(`${API_BASE_URL}/user-services/all-services`, {
         credentials: 'include'
       });
       const data = await response.json();

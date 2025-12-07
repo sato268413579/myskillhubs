@@ -23,7 +23,7 @@ const Service: React.FC = () => {
   React.useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/user-services/my-services`, {
+        const response = await fetch(`${API_BASE_URL}/user-services/my-services`, {
           credentials: 'include'
         });
         const data = await response.json();
