@@ -1,5 +1,9 @@
 import API_BASE_URL from "../config/api";
-import { Service } from "../types";
+
+export interface CurrentUser {
+  id: number;
+  username: string;
+}
 
 export const login = async (username: string, password: string): Promise<{ message: string }> => {
   const res = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -19,7 +23,7 @@ export const logout = async (): Promise<{ message: string }> => {
   return res.json();
 };
 
-export const currentUser = async (): Promise<{ message: string }> => {
+export const currentUser = async (): Promise<CurrentUser> => {
   const res = await fetch(`${API_BASE_URL}/auth/me`, {
     method: "GET",
     credentials: "include",
