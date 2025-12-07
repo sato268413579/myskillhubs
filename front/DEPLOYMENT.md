@@ -19,7 +19,17 @@ docker-compose down
 
 本番環境では、ビルドした静的ファイルをNginxで配信します。
 
+### 設定ファイルの切り替え
+
+本番環境用のNginx設定を使用する場合：
+
 ```bash
+# 開発用設定をバックアップ
+cp nginx/conf.d/myskillhubs.conf nginx/conf.d/myskillhubs.dev.conf
+
+# 本番用設定を適用
+cp nginx/conf.d/myskillhubs.prod.conf nginx/conf.d/myskillhubs.conf
+
 # ビルドと起動
 docker-compose -f docker-compose.prod.yml up -d --build
 
@@ -29,9 +39,10 @@ docker-compose -f docker-compose.prod.yml down
 
 - アクセス: http://localhost (ポート80)
 
-### 本番環境の特徴
+### 本番環境の構成
+- **frontコンテナ**: ビルドされた静的ファイルをNginxで配信（ポート80）
+- **nginxコンテナ**: リバースプロキシ、SSL終端、ロードバランサー
 - マルチステージビルドで最適化
-- 静的ファイルをNginxで高速配信
 - 開発用の依存関係を含まない軽量イメージ
 - "Invalid Host header"エラーが発生しない
 
