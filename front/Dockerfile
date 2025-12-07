@@ -1,5 +1,4 @@
-# ビルドステージ
-FROM node:18 AS build
+FROM node:18
 
 WORKDIR /app
 
@@ -13,14 +12,8 @@ COPY . .
 # 本番用ビルド
 RUN npm run build
 
-# 本番ステージ - Nginx
-FROM nginx:alpine
+RUN npm install -g serve
+CMD ["serve", "-s", "build", "-l", "3000"]
 
-# ビルドされたファイルをNginxのドキュメントルートにコピー
-COPY --from=build /app/build /usr/share/nginx/html
-
-# カスタムNginx設定があればコピー
-COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# 開発時のみ
+# CMD ["npm", "start"]

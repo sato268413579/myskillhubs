@@ -1,36 +1,31 @@
-version: '3'
+version: '3.3'
 services:
   front:
     container_name: front
     build:
       context: ./
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-      - HOST=0.0.0.0
-      - DANGEROUSLY_DISABLE_HOST_CHECK=true
     volumes:
-      - ./:/app:cached
-      - /app/node_modules  # ← ここでコンテナ側に node_modules を確保
-    command: ["npm", "start"]
+      - ./:/app
     networks:
       - mynetwork
 
   nginx:
-    image: nginx:stable
+    image: nginx:latest
     container_name: front_nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - /etc/letsencrypt/archive/dev.myskillhubs.com:/etc/nginx/certs:ro
+      - ${SSL_CERTS_PATH:-./nginx/certs}:/etc/nginx/certs:ro
     depends_on:
       - front
     networks:
       - mynetwork
+
 networks:
   mynetwork:
-    external: true   # ← backend と同じネットワークを使う
+    external: true
