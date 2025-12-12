@@ -7,9 +7,6 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "3000:3000"
-    volumes:
-      - ./front/:/app
-      - .env:/app/.env
     env_file:
       - ./.env
   nginx:
@@ -33,9 +30,6 @@ services:
       - "5000:5000"
     depends_on:
       - db
-    volumes:
-      - ./back/:/app
-      - .env:/app/.env
     env_file:
       - ./.env
 
