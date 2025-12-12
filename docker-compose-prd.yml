@@ -20,7 +20,7 @@ services:
       - "443:443"
     volumes:
       - ./front/nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./front/certs:/etc/nginx/certs:ro
+      - ./front/nginx/certs:/etc/nginx/certs:ro
     depends_on:
       - front
   api:
