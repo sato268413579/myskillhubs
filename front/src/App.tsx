@@ -7,7 +7,6 @@ import CRM from "./pages/CRM";
 import Tasks from "./pages/TaskManager";
 import TrendSearch from "./pages/TrendSearch";
 import Menu3D from "./pages/3DUXPractice";
-import MyCustomApp from "./pages/MyCustomApp";
 import ConstructionSchedule from "./pages/ConstructionSchedule";
 import GanttChart from "./pages/GanttChart";
 import ServiceSettings from "./pages/ServiceSettings";

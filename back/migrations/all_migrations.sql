@@ -2,11 +2,11 @@
 -- MySkillHubs - 統合マイグレーションスクリプト（完全版）
 -- ============================================================================
 -- 全てのテーブルを削除してから再作成します（データは全て削除されます）
--- 実行方法: mysql -u root -p myapp < back/migrations/all_migrations.sql
--- または: docker exec -i db mysql -uroot -pexample myapp < back/migrations/all_migrations.sql
+-- 実行方法: mysql -u root -p pocs < back/migrations/all_migrations.sql
+-- または: docker exec -i db mysql -uroot -pexample pocs < back/migrations/all_migrations.sql
 -- ============================================================================
 
-USE myapp;
+USE pocs;
 
 -- ============================================================================
 -- 警告: 全てのデータが削除されます
@@ -246,7 +246,7 @@ SELECT '✅ Step 1: Construction Schedule tables created' AS status;
 SET @column_exists = (
     SELECT COUNT(*) 
     FROM information_schema.COLUMNS 
-    WHERE TABLE_SCHEMA = 'myapp' 
+    WHERE TABLE_SCHEMA = 'pocs' 
     AND TABLE_NAME = 'projects' 
     AND COLUMN_NAME = 'user_id'
 );
@@ -273,7 +273,7 @@ MODIFY COLUMN user_id INT NOT NULL COMMENT 'ユーザーID';
 SET @constraint_exists = (
     SELECT COUNT(*) 
     FROM information_schema.TABLE_CONSTRAINTS 
-    WHERE CONSTRAINT_SCHEMA = 'myapp' 
+    WHERE CONSTRAINT_SCHEMA = 'pocs' 
     AND TABLE_NAME = 'projects' 
     AND CONSTRAINT_NAME = 'fk_projects_user_id'
 );
@@ -291,7 +291,7 @@ DEALLOCATE PREPARE stmt;
 SET @index_exists = (
     SELECT COUNT(*) 
     FROM information_schema.STATISTICS 
-    WHERE TABLE_SCHEMA = 'myapp' 
+    WHERE TABLE_SCHEMA = 'pocs' 
     AND TABLE_NAME = 'projects' 
     AND INDEX_NAME = 'idx_user_id'
 );
