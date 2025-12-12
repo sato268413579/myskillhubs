@@ -1,48 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import API_BASE_URL from '../config/api';
-
-interface Project {
-  id: number;
-  name: string;
-  description: string;
-  client_name: string;
-  site_location: string;
-  start_date: string;
-  end_date: string;
-  status: 'planning' | 'in_progress' | 'completed' | 'on_hold';
-  milestones_count: number;
-}
-
-interface Milestone {
-  id: number;
-  project_id: number;
-  name: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-  display_order: number;
-  status: 'not_started' | 'in_progress' | 'completed' | 'delayed';
-  progress_percentage: number;
-  assigned_to: string;
-  color: string;
-  notes: string;
-}
+import {
+  Project,
+  projectFormData,
+  getProjects,
+  createProjects,
+  deleteProjects,
+} from  "../services/ConstructionScheduleService";
 
 const ConstructionSchedule: React.FC = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProjectForm, setShowProjectForm] = useState(false);
-  const [formData, setFormData] = useState<{
-    name: string;
-    description: string;
-    client_name: string;
-    site_location: string;
-    start_date: string;
-    end_date: string;
-    status: 'planning' | 'in_progress' | 'completed' | 'on_hold';
-  }>({
+  const [formData, setFormData] = useState<projectFormData>({
     name: '',
     description: '',
     client_name: '',
@@ -57,33 +28,17 @@ const ConstructionSchedule: React.FC = () => {
   }, []);
 
   const loadProjects = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/construction-schedule/projects`, {
-        credentials: 'include'
-      });
-      const data = await response.json();
-      if (data.success) {
-        setProjects(data.projects);
-      }
-    } catch (error) {
-      console.error('プロジェクト取得エラー:', error);
-    } finally {
-      setLoading(false);
-    }
+    const response = await getProjects();
+    setProjects(response.projects);
+    setLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_BASE_URL}/construction-schedule/projects`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(formData)
-      });
-      const data = await response.json();
+      const data = await createProjects(formData);
       if (data.success) {
-        alert('プロジェクトを作成しました');
+        alert(data.message);
         setShowProjectForm(false);
         setFormData({
           name: '',
@@ -109,13 +64,9 @@ const ConstructionSchedule: React.FC = () => {
       return;
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/construction-schedule/projects/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      const data = await response.json();
+      const data = await deleteProjects(id);
       if (data.success) {
-        alert('プロジェクトを削除しました');
+        alert(data.message);
         loadProjects();
       }
     } catch (error) {

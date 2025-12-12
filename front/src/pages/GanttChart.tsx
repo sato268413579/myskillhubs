@@ -1,8 +1,14 @@
+import ReactMarkdown from "react-markdown";
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
+import {
+  Milestone,
+  getProjectAndMilestones,
+  callGemini
+} from  "../services/GanttService";
 
-interface Project {
+export interface Project {
   id: number;
   name: string;
   description: string;
@@ -11,21 +17,6 @@ interface Project {
   start_date: string;
   end_date: string;
   status: string;
-}
-
-interface Milestone {
-  id: number;
-  project_id: number;
-  name: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-  display_order: number;
-  status: 'not_started' | 'in_progress' | 'completed' | 'delayed';
-  progress_percentage: number;
-  assigned_to: string;
-  color: string;
-  notes: string;
 }
 
 const GanttChart: React.FC = () => {
@@ -37,6 +28,10 @@ const GanttChart: React.FC = () => {
   const [showMilestoneForm, setShowMilestoneForm] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
   const [draggedMilestone, setDraggedMilestone] = useState<Milestone | null>(null);
+  const [showCallGemini, setCallGemini] = useState("");
+  const [showAnalysisPanel, setShowAnalysisPanel] = useState(false);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
@@ -234,6 +229,26 @@ const GanttChart: React.FC = () => {
 
   const { start: rangeStart, end: rangeEnd, days: totalDays } = getDateRange();
 
+  const handleCallGemini = async(project: Project, milestones: Milestone[]) => {
+    try {
+      setAnalysisLoading(true);
+      setShowAnalysisPanel(true);
+      // console.log(project);
+      // console.log(milestones);
+      const data = await callGemini(project, milestones);
+
+      if (data.success) {
+        setCallGemini(data.message);
+      }
+
+    } catch (error) {
+      console.error('gemini error:', error);
+    } finally {
+      loadProjectAndMilestones();
+      setAnalysisLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -261,6 +276,13 @@ const GanttChart: React.FC = () => {
                 )}
               </div>
             </div>
+            <button
+              onClick={() => handleCallGemini(project, milestones)}
+              className="px-2 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+            >
+              <span className="text-xl">+</span>
+              AIに分析
+            </button>
             <button
               onClick={() => {
                 setEditingMilestone(null);
@@ -504,6 +526,32 @@ const GanttChart: React.FC = () => {
           </div>
         )}
       </div>
+      {analysisLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-4 text-white font-semibold">AIが分析中です...</p>
+          </div>
+        </div>
+      )}
+
+      {showAnalysisPanel && (
+        <div className="fixed top-0 right-0 h-full w-96 bg-white shadow-xl border-l z-50 p-6 overflow-y-auto">
+    
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">AI 分析結果</h2>
+            <button
+              onClick={() => setShowAnalysisPanel(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+            <div className="prose max-w-none text-gray-800 leading-relaxed">
+              <ReactMarkdown>{showCallGemini}</ReactMarkdown>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

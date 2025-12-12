@@ -1,11 +1,16 @@
 """
 工事工程管理機能のルート
 """
+import os
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from datetime import datetime
 from models.construction_schedule import Project, Milestone, MilestoneHistory
 from config.db import db
+from langchain_google_genai import ChatGoogleGenerativeAI
+from google import genai
+from google.oauth2 import service_account
+from google.cloud import aiplatform
 
 construction_schedule_bp = Blueprint('construction_schedule', __name__, url_prefix='/api/construction-schedule')
 
@@ -399,6 +404,119 @@ def get_milestone_history(milestone_id):
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+# ============================================
+# Gemini クライアント初期化（Vertex AI 用）
+# ============================================
+def init_gemini_vertex(
+    project_id: str,
+    location: str,
+    service_account_json: str
+):
+    # サービスアカウント読み込み
+    credentials = service_account.Credentials.from_service_account_file(
+        service_account_json,
+        scopes=["https://www.googleapis.com/auth/cloud-platform"]
+    )
+
+    # Cloud (Vertex AI) モードで初期化
+    client = Client(
+        vertexai=True,
+        project=project_id,
+        location=location,
+        credentials=credentials
+    )
+
+    return client
+
+
+# ============================================
+# Gemini へテキストプロンプト送信
+# ============================================
+@construction_schedule_bp.route('/call_gemini', methods=['POST'])
+@login_required
+def call_gemini():
+    data = request.get_json()
+    project = data["project"]
+    milestones = data["milestones"]
+
+    # required = ['assigned_to', 'name', 'description']
+    # if not all(key in data for key in required):
+    #     return jsonify({
+    #         'success': True,
+    #         "message": '必須パラメータが足りません。'
+    #     })
+
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    SA_KEY_PATH = os.path.join(BASE_DIR, "..", "..", "config", "service-account.json")
+    SA_KEY_PATH = os.path.abspath(SA_KEY_PATH)
+
+    credentials = service_account.Credentials.from_service_account_file(
+        SA_KEY_PATH,
+        scopes=["https://www.googleapis.com/auth/cloud-platform"]
+    )
+
+    client = genai.Client(
+        vertexai=True,   # Vertex AI 経由
+        project=os.environ["GCP_PROJECT"],
+        location=os.environ["GCP_LOCATION"],
+        credentials=credentials
+    )
+    project_info = f"""
+■プロジェクト情報
+- 名称: {project['name']}
+- 概要: {project['description']}
+"""
+
+    milestones_text = ""
+    for i, m in enumerate(milestones, start=1):
+        milestones_text += f"""
+{i}. {m.get('name', '名称なし')}
+   説明: {m.get('description', '')}
+   期間: {m.get('start_date', '')} 〜 {m.get('end_date', '')}
+   進捗: {m.get('progress_percentage', '0')}%
+   担当: {m.get('assigned_to', '未割当')}
+"""
+
+    prompt = f"""
+あなたは建設系クライアント向けにAI導入提案資料をつくる専門コンサルタントです。
+
+【出力ルール】
+- 重要なポイントを “最大4セクション” にまとめる
+- 各セクションは以下の4要素だけを書く：
+  ① 一言タイトル  
+  ② 効果（数字必須）  
+  ③ 実際に何ができるか（3〜4つ以内）  
+  ④ 導入ハードル（短く）
+- 箇条書きは最大4つまで
+- 専門用語よりも読みやすさ優先
+- 新規事業の役員に説明する前提で簡潔に
+- 全体の文章量は 600〜900文字以内
+- 表や区切り線などを使わず、シンプルな見た目にする
+
+---
+
+【プロジェクト情報】
+{project_info}
+
+【マイルストーン一覧】
+{milestones_text}
+---
+
+建設現場の実運用を意識し、
+「どこに AI を入れると工数が一番削減できるか」を実務者視点で分析してください。
+"""
+
+    # result = llm.invoke(prompt)
+    result = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+
+    return jsonify({
+        'success': True,
+        "message": result.text
+    })
 
 
 # ==================== テスト用エンドポイント ====================
